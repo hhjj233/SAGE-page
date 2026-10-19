@@ -1,0 +1,52 @@
+[
+ {
+  "id": "A2",
+  "group": "opinion",
+  "city": "San Francisco"
+ },
+ {
+  "id": "A1",
+  "group": "opinion",
+  "city": "Philadelphia"
+ },
+ {
+  "id": "C175",
+  "group": "check",
+  "city": "San Francisco"
+ },
+ {
+  "id": "S7",
+  "group": "check",
+  "city": "Denver"
+ },
+ {
+  "id": "B6",
+  "group": "check",
+  "city": "Minneapolis"
+ },
+ {
+  "id": "C109",
+  "group": "check",
+  "city": "Boston"
+ },
+ {
+  "id": "C020",
+  "group": "check",
+  "city": "San Francisco"
+ },
+ {
+  "id": "D15",
+  "group": "direct",
+  "city": "Indianapolis"
+ },
+ {
+  "id": "D8",
+  "group": "direct",
+  "city": "San Antonio"
+ },
+ {
+  "id": "D9",
+  "group": "direct",
+  "city": "Philadelphia"
+ }
+]

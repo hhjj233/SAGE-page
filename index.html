@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SAGE Work-Zone Pathways</title>
+<meta name="description" content="SAGE: a hybrid vision-language and geometry framework for work-zone pathway prediction under temporary traffic control.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='%230f172a'/%3E%3Cpath d='M10 45 21 9M38 45 27 9' stroke='%23475569' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M24 37C24 29 18.5 24 20.5 11' fill='none' stroke='%23ea580c' stroke-width='3.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='43' r='2' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Noto+Sans:400,500,700|Noto+Sans+Mono:400&display=swap">
+<style>
+:root {
+  --bg: #ffffff; --bg-alt: #f6f7f9; --card: #ffffff; --ink: #3a3f45; --ink-strong: #1d2126; --muted: #5f6873; --faint: #8a929c;
+  --line: #e4e7eb; --chip: #f1f3f5; --btn: #2f3236; --btn-ink: #ffffff; --btn-hover: #111315;
+  --accent: #c2410c; --accent-soft: #fff1e7; --link: #1f5fbf; --ours: #fff7ef; --ours-line: #fbd5b5;
+  --bev-bg: #f8fafc; --bev-grid: #e2e8f0; --bev-axis: #8794a6; --bev-pool: #cbd5e1; --ego: #334155; --fov: rgba(37, 99, 235, 0.05);
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 6px 20px rgba(16, 24, 40, 0.07);
+  --display: "Google Sans", "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --text: "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Noto Sans Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --bg-alt: #141820; --card: #161b22; --ink: #c6ced8; --ink-strong: #f0f3f6; --muted: #9aa4b0; --faint: #6f7883;
+    --line: #262c35; --chip: #1d232c; --btn: #e6e8eb; --btn-ink: #111418; --btn-hover: #ffffff;
+    --accent: #fb923c; --accent-soft: #2a1a0f; --link: #8ab8ff; --ours: #22170f; --ours-line: #5a3416;
+    --bev-bg: #11151b; --bev-grid: #222a34; --bev-axis: #6b7684; --bev-pool: #3a4350; --ego: #94a3b8; --fov: rgba(96, 165, 250, 0.07);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --bg-alt: #141820; --card: #161b22; --ink: #c6ced8; --ink-strong: #f0f3f6; --muted: #9aa4b0; --faint: #6f7883;
+  --line: #262c35; --chip: #1d232c; --btn: #e6e8eb; --btn-ink: #111418; --btn-hover: #ffffff;
+  --accent: #fb923c; --accent-soft: #2a1a0f; --link: #8ab8ff; --ours: #22170f; --ours-line: #5a3416;
+  --bev-bg: #11151b; --bev-grid: #222a34; --bev-axis: #6b7684; --bev-pool: #3a4350; --ego: #94a3b8; --fov: rgba(96, 165, 250, 0.07);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.65 var(--text); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { font-family: var(--display); color: var(--ink-strong); text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.wrap { max-width: 992px; margin-inline: auto; padding-inline: 16px; }
+.center { text-align: center; }
+section { padding-block: 56px; }
+.band { background: var(--bg-alt); }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* hero */
+.hero { padding-block: 64px 28px; text-align: center; }
+.brand { display: inline-flex; align-items: center; gap: 0.3em; font-size: clamp(2.6rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: 0.01em; }
+.brand svg { width: 1.05em; height: 1.05em; border-radius: 0.24em; box-shadow: var(--shadow); }
+.paper-title { margin-top: 10px; font-family: var(--display); font-size: clamp(1.35rem, 3.2vw, 1.95rem); line-height: 1.3; color: var(--ink-strong); font-weight: 500; max-width: 860px; margin-inline: auto; text-wrap: balance; }
+.expand { margin-top: 10px; font-family: var(--display); font-size: 1.05rem; color: var(--muted); letter-spacing: 0.02em; }
+.expand b { color: var(--accent); font-weight: 500; }
+.authors { margin-top: 18px; font-family: var(--display); font-size: 1.25rem; color: var(--ink-strong); }
+.authors span { white-space: nowrap; }
+.affil { margin-top: 4px; font-family: var(--display); font-size: 1.08rem; color: var(--muted); }
+.note { margin-top: 4px; font-size: 0.86rem; color: var(--faint); }
+.links { margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 0.5em; padding: 0.52em 1.15em; border-radius: 999px; background: var(--btn); color: var(--btn-ink); font: 500 1rem/1.2 var(--display); border: 0; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease; }
+.btn:hover { text-decoration: none; background: var(--btn-hover); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn svg, .btn i { width: 1em; }
+.btn.soon { opacity: 0.55; cursor: default; }
+.btn.soon:hover { transform: none; box-shadow: none; background: var(--btn); }
+.btn .tag { font-size: 0.68em; padding: 0.15em 0.55em; border-radius: 999px; border: 1px solid currentColor; opacity: 0.8; }
+
+/* teaser */
+.teaser-sec { padding-block: 8px 48px; }
+.teaser { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #0b0d10; box-shadow: var(--shadow); max-width: 100%; }
+.tile svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tile img.poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile .lab { position: absolute; left: 8px; bottom: 8px; display: inline-flex; align-items: center; gap: 0.45em; font: 500 12px/1 var(--display); color: #fff; background: rgba(15, 23, 42, 0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 0.45em 0.7em; border-radius: 999px; }
+.tile .lab .dot { width: 8px; height: 8px; border-radius: 50%; }
+.legend { margin-top: 14px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; font-size: 0.84rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.lede { margin: 26px auto 0; max-width: 860px; text-align: center; font: 400 1.32rem/1.55 var(--display); color: var(--ink); }
+.lede em { font-style: normal; color: var(--accent); font-weight: 500; }
+
+/* section heads */
+.sec-title { display: flex; align-items: center; justify-content: center; gap: 0.5em; font-size: clamp(1.6rem, 3.4vw, 2rem); font-weight: 500; margin-bottom: 10px; }
+.badge { width: 1.55em; height: 1.55em; border-radius: 0.5em; display: inline-grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 0.72em; flex: none; }
+.sec-sub { text-align: center; color: var(--muted); max-width: 720px; margin: 0 auto 28px; }
+h3.sub { font-size: 1.28rem; font-weight: 500; margin: 40px 0 14px; display: flex; align-items: center; gap: 0.5em; }
+h3.sub .badge { font-size: 0.8em; }
+
+/* highlights */
+.hl { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 18px; }
+.hl li { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 16px; align-items: start; font-size: 1.08rem; }
+.hl .num { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--card); border: 1px solid var(--line); color: var(--accent); box-shadow: var(--shadow); font-size: 1.1rem; }
+.hl b { color: var(--ink-strong); font-family: var(--display); font-weight: 500; }
+.hl em { font-style: normal; color: var(--accent); font-weight: 500; }
+
+/* figures */
+figure { margin: 0; }
+.fig { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; box-shadow: var(--shadow); }
+.fig img { display: block; width: 100%; height: auto; border-radius: 6px; cursor: zoom-in; background: #ffffff; }
+.figcap { margin-top: 10px; font-size: 0.92rem; color: var(--muted); line-height: 1.6; }
+.figcap b { color: var(--ink-strong); font-weight: 500; }
+
+/* steps */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.step { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+.step .k { display: flex; align-items: center; gap: 0.55em; font: 500 0.76rem/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.step .k .badge { font-size: 1.15rem; }
+.step h4 { font-size: 1.06rem; font-weight: 500; }
+.step p { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; font: 500 0.78rem/1.2 var(--display); padding: 0.35em 0.7em; border-radius: 999px; background: var(--chip); color: var(--ink); width: fit-content; }
+.formula { margin: 22px auto 0; width: fit-content; max-width: 100%; font: 400 1.02rem/1.5 var(--display); padding: 10px 18px; border-radius: 12px; border: 1px dashed var(--line); color: var(--ink-strong); text-align: center; }
+
+/* tabs */
+.tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 16px; }
+.tab { font: 500 0.92rem/1.2 var(--display); padding: 0.5em 1em; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 0.5em; transition: background 0.15s, color 0.15s; }
+.tab:hover { border-color: var(--faint); }
+.tab[aria-selected="true"] { background: var(--btn); color: var(--btn-ink); border-color: transparent; }
+.tabpanel[hidden] { display: none; }
+
+/* tables */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; }
+thead th { font: 500 0.82rem/1.3 var(--display); color: var(--muted); background: var(--bg-alt); vertical-align: bottom; }
+thead th small { display: block; font-weight: 400; color: var(--faint); }
+tr.grp td { font: 500 0.8rem/1.2 var(--display); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; background: var(--bg-alt); text-align: left; }
+tr.ours td { background: var(--ours); }
+tr.ours td:first-child { font-weight: 500; color: var(--ink-strong); box-shadow: inset 3px 0 0 #ea580c; }
+tbody tr:last-child td { border-bottom: 0; }
+.tnote { margin-top: 10px; font-size: 0.84rem; color: var(--muted); }
+.prov td { white-space: normal; text-align: left; vertical-align: top; }
+.prov td:first-child { white-space: nowrap; font-family: var(--display); font-weight: 500; color: var(--ink-strong); }
+
+/* video */
+.player { display: grid; gap: 14px; }
+.player video { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; background: #ffffff; box-shadow: var(--shadow); display: block; border: 1px solid var(--line); }
+.vinfo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; text-align: center; }
+.vinfo h4 { font-size: 1.12rem; font-weight: 500; }
+.vinfo p { color: var(--muted); font-size: 0.95rem; max-width: 760px; margin-inline: auto; }
+
+/* viewer */
+.cgroups { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; margin-bottom: 18px; }
+.cgroup { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cgroup > span { font: 500 0.74rem/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-right: 2px; }
+.cchip { font: 500 0.86rem/1.2 var(--display); padding: 0.42em 0.85em; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.cchip small { color: var(--faint); font-weight: 400; margin-left: 0.35em; }
+.cchip[aria-pressed="true"] { background: var(--btn); color: var(--btn-ink); border-color: transparent; }
+.cchip[aria-pressed="true"] small { color: inherit; opacity: 0.7; }
+.vgrid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.camwrap { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #0b0d10; box-shadow: var(--shadow); max-width: 100%; }
+.camwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.camwrap .zoom { position: absolute; right: 8px; top: 8px; font: 500 12px/1 var(--display); color: #fff; background: rgba(15, 23, 42, 0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 0; padding: 0.5em 0.75em; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 0.45em; align-items: center; }
+.cinfo { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 100%; }
+.cinfo .meta { font: 500 0.78rem/1.2 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 0.5em; }
+.cinfo h4 { font-size: 1.12rem; font-weight: 500; }
+.cinfo p { font-size: 0.92rem; color: var(--muted); line-height: 1.6; }
+.cinfo .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cinfo .chips .chip b { font-weight: 500; color: var(--ink-strong); }
+.ctl { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 16px 0 12px; }
+.pchip { font: 500 0.82rem/1.2 var(--display); padding: 0.38em 0.75em 0.38em 0.6em; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 0.45em; }
+.pchip[aria-pressed="false"] { opacity: 0.45; }
+.pchip.layer { background: var(--chip); }
+.bevwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--bev-bg); }
+.bevwrap svg { display: block; min-width: 680px; width: 100%; height: auto; }
+.bevcap { margin-top: 10px; font-size: 0.86rem; color: var(--muted); line-height: 1.6; }
+.bevcap b { color: var(--ink-strong); font-weight: 500; }
+.mtable { margin-top: 14px; }
+.mtable td .sw { margin-right: 8px; vertical-align: middle; }
+.ok { color: var(--ink); }
+.bad { color: #dc2626; font-weight: 500; }
+.na { color: var(--faint); }
+
+/* results */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.stat .v { font: 500 2rem/1.1 var(--display); color: var(--accent); }
+.stat .d { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.chart { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.chart h4 { font-size: 1rem; font-weight: 500; margin-bottom: 2px; }
+.chart .cs { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+.bars { display: grid; gap: 5px; }
+.bar { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 3.2em; align-items: center; gap: 8px; font-size: 0.82rem; }
+.bar .n { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .t { height: 10px; border-radius: 5px; background: var(--chip); position: relative; overflow: hidden; }
+.bar .t i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; background: var(--faint); }
+.bar.ours .n { color: var(--ink-strong); font-weight: 500; }
+.bar.ours .t i { background: #ea580c; }
+.bar .x { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.dumb { display: grid; gap: 12px; }
+.dumb .row { display: grid; gap: 4px; }
+.dumb .lab { font-size: 0.82rem; color: var(--ink); display: flex; justify-content: space-between; gap: 8px; }
+.dumb .lab b { color: var(--accent); font-weight: 500; white-space: nowrap; }
+.dumb .track { position: relative; height: 16px; margin-inline: 6px; }
+.dumb .track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--line); border-radius: 1px; }
+.dumb .seg { position: absolute; top: 6px; height: 4px; background: #ea580c; border-radius: 2px; }
+.dumb .dot { position: absolute; top: 2px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; border: 2px solid var(--card); }
+.dumb .dot.a { background: var(--faint); }
+.dumb .dot.b { background: #ea580c; }
+.timeline .tscroll { overflow-x: auto; }
+.timeline svg { width: 100%; min-width: 620px; height: auto; display: block; }
+
+/* bibtex */
+.bib { position: relative; background: var(--bg-alt); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px; overflow-x: auto; }
+.bib pre { margin: 0; font: 0.86rem/1.6 var(--mono); color: var(--ink-strong); white-space: pre; }
+.copy { position: absolute; top: 10px; right: 10px; }
+.copy.btn { padding: 0.4em 0.85em; font-size: 0.85rem; }
+
+footer { padding-block: 34px 48px; text-align: center; font-size: 0.85rem; color: var(--faint); border-top: 1px solid var(--line); }
+footer p + p { margin-top: 6px; }
+
+/* lightbox and back to top */
+.lightbox { position: fixed; inset: 0; z-index: 50; background: rgba(8, 10, 14, 0.86); display: grid; place-items: center; padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px); cursor: zoom-out; overflow: auto; }
+.lightbox img { max-width: min(1600px, 100%); max-height: none; background: #fff; border-radius: 8px; }
+.lightbox[hidden] { display: none; }
+#btt { position: fixed; right: 22px; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); width: 46px; height: 46px; border-radius: 12px; border: 0; background: rgba(110, 110, 115, 0.55); color: #fff; display: grid; place-items: center; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, background 0.2s; z-index: 40; font-size: 1.1rem; }
+#btt.show { opacity: 1; visibility: visible; }
+#btt:hover { background: #333; }
+
+@media (max-width: 860px) {
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vgrid { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .charts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  section { padding-block: 44px; }
+  .teaser { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .teaser .tile:nth-child(9) { display: none; }
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .hl li { grid-template-columns: 38px minmax(0, 1fr); gap: 12px; font-size: 1rem; }
+  .hl .num { width: 38px; height: 38px; border-radius: 11px; }
+  .lede { font-size: 1.15rem; }
+  .bar { grid-template-columns: 7.6em minmax(0, 1fr) 3em; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn, #btt { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <h1 class="brand">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="#0f172a"/><path d="M10 45 21 9M38 45 27 9" stroke="#475569" stroke-width="2.2" stroke-linecap="round"/><path d="M24 37C24 29 18.5 24 20.5 11" fill="none" stroke="#ea580c" stroke-width="3.6" stroke-linecap="round"/><circle cx="24" cy="43" r="2" fill="#fff"/><path d="M33.5 33.5 36.3 24.5 39.1 33.5Z" fill="#f59e0b"/><rect x="32.4" y="33" width="7.8" height="2" rx="1" fill="#f59e0b"/><path d="M34.6 29.2h3.4" stroke="#fff" stroke-width="1.3"/></svg>
+    SAGE
+  </h1>
+  <p class="paper-title">A Hybrid Vision–Language and Geometry Framework for Work-Zone Pathway Prediction under Temporary Traffic Control</p>
+  <p class="expand"><b>S</b>emantic-to-<b>A</b>ction <b>G</b>rounded <b>E</b>xecution</p>
+  <p class="authors"><span>Jiaxi Liu</span>, <span>Weizhe Tang</span>, <span>Bofeng Cao</span>, <span>Sikai Chen</span>, <span>Xiaopeng Li</span>, <span>Steven T. Parker</span>, <span>Bin Ran<sup>*</sup></span></p>
+  <p class="affil">University of Wisconsin–Madison</p>
+  <p class="note"><sup>*</sup>Corresponding author</p>
+  <nav class="links" aria-label="Paper links">
+    <a class="btn" data-link="paper"><i class="fa-solid fa-file-pdf"></i><span>Paper</span></a>
+    <a class="btn" data-link="arxiv"><i class="fa-regular fa-file-lines"></i><span>arXiv</span></a>
+    <a class="btn" data-link="code"><i class="fa-brands fa-github"></i><span>Code</span></a>
+    <a class="btn" href="https://doi.org/10.1109/ICCV51701.2025.00579" target="_blank" rel="noopener"><i class="fa-solid fa-database"></i><span>ROADWork data</span></a>
+    <a class="btn" href="#bev"><i class="fa-solid fa-map-location-dot"></i><span>Bird's-eye view</span></a>
+  </nav>
+</header>
+
+<section class="teaser-sec">
+  <div class="wrap">
+    <div class="teaser" id="teaser" aria-label="Nine ROADWork validation frames with the stored outputs of SAGE"></div>
+    <div class="legend" id="teaser-legend"></div>
+    <h2 class="lede">SAGE uses a vision–language model's trajectory as an <em>opinion over intact geometric candidates</em> and checks the chosen path against <em>MUTCD provisions</em> with a bounded intervention, so geometry writes every coordinate of the output.</h2>
+  </div>
+</section>
+
+<section class="band" id="highlights">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-star"></i></span>Highlights</h2>
+    <figure class="fig" style="max-width: 760px; margin: 18px auto 0;">
+      <img src="static/images/fig1_motivation.jpg" width="1600" height="1615" loading="lazy" alt="Three ways to predict a work-zone pathway: a geometric predictor drifts toward the coned-off side, an end-to-end VLM reads the scene but executes imprecisely, and SAGE re-ranks intact geometric candidates with the VLM opinion and checks them against MUTCD provisions.">
+      <figcaption class="figcap"><b>Temporary-control-aware pathway prediction.</b> (a) A geometric predictor selects a smooth path toward the coned-off side. (b) A VLM provides a scene interpretation and an imprecise trajectory. (c) SAGE uses the trajectory as a preference over intact geometric candidates and the structured reading as input to checks derived from MUTCD provisions. The paths illustrate the division of labor.</figcaption>
+    </figure>
+    <ol class="hl">
+      <li><span class="num"><i class="fa-solid fa-magnifying-glass-chart"></i></span><p><b>Selection is the bottleneck.</b> The 120 geometric candidates contain a path within 10 px of the human demonstration in <em>87% of episodes</em>, yet selection regret accounts for 53% of the geometric ranker's error.</p></li>
+      <li><span class="num"><i class="fa-solid fa-route"></i></span><p><b>Trajectory as opinion.</b> SAGE-VLM's trajectory ranks the intact candidates by distance, and rank fusion with the geometric score improves <em>all four</em> tested generator–selector combinations.</p></li>
+      <li><span class="num"><i class="fa-solid fa-shield-halved"></i></span><p><b>Read the zone, then check the path.</b> MUTCD-structured supervision has SAGE-VLM state the lane status and hazard side before its decision; MUTCD-derived predicates drive a bounded intervention that cuts hard-constraint violations by <em>37%</em>.</p></li>
+      <li><span class="num"><i class="fa-solid fa-bolt"></i></span><p><b>Accurate with a faster VLM.</b> SAGE lowers ADE by 8.3% and FDE by 12.0% relative to the geometric ranker, is comparable to OneVL in accuracy with a VLM that answers in <em>3.45 s against 4.26 s</em>, and outperforms four other adapted driving VLMs in displacement error and safety measures.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-diagram-project"></i></span>How SAGE works</h2>
+    <p class="sec-sub">Read, decide, execute, check: four steps meet in one shared pool of candidate paths. Geometry builds every path; SAGE-VLM and the MUTCD predicates choose among them.</p>
+    <figure class="fig">
+      <img src="static/images/fig2_framework.jpg" width="2400" height="1688" loading="lazy" alt="SAGE framework: SAGE-VLM reads and decides in the upper band, RD-YNet proposes geometric candidates in the middle band, MUTCD predicates and the bounded intervention check the choice in the lower band, and the trajectory-as-opinion executor fuses geometric and opinion ranks on the right.">
+      <figcaption class="figcap"><b>Overview of SAGE.</b> Middle band: role segmentation conditions the free-space and TTC-conditioned branches of RD-YNet, which propose 60 + 60 intact candidates, and a geometric ranker scores them. Upper band: SAGE-VLM states the lane status and hazard side, a passage decision, a goal, and a 15-point trajectory; its distance to each candidate yields an opinion rank. Right: the executor fuses the geometric and opinion ranks (SAGE w/o VLM blue, SAGE w/o Z0 yellow, SAGE output orange). Lower band: MUTCD predicates drive the audit and the bounded intervention Z0. Select a figure to enlarge it.</figcaption>
+    </figure>
+    <div class="steps">
+      <div class="step"><span class="k"><span class="badge"><i class="fa-solid fa-eye"></i></span>Read</span><h4>State the work zone</h4><p>SAGE-VLM first states the lane status and the hazard side, the side from which traffic is redirected.</p><span class="chip"><i class="fa-regular fa-clock"></i>reading + decision 0.73 s</span></div>
+      <div class="step"><span class="k"><span class="badge"><i class="fa-solid fa-signs-post"></i></span>Decide</span><h4>Commit to a passage</h4><p>It then gives a passage decision, a goal, and a 15-point trajectory, which SAGE uses only as an opinion.</p><span class="chip"><i class="fa-regular fa-clock"></i>goal 0.92 s · path 3.04 s</span></div>
+      <div class="step"><span class="k"><span class="badge"><i class="fa-solid fa-ranking-star"></i></span>Execute</span><h4>Fuse two rankings</h4><p>Each of the 120 RD-YNet candidates gets a geometric rank and an opinion rank from its distance to the SAGE-VLM path.</p><span class="chip"><i class="fa-solid fa-layer-group"></i>60 + 60 candidates</span></div>
+      <div class="step"><span class="k"><span class="badge"><i class="fa-solid fa-clipboard-check"></i></span>Check</span><h4>Apply MUTCD predicates</h4><p>Z0 may replace a failing choice with the highest-ranked passing candidate within Δs ≤ 0.15 and D ≤ 38.4 px.</p><span class="chip"><i class="fa-solid fa-sliders"></i>no trainable parameters</span></div>
+    </div>
+    <p class="formula">s(j) = 0.7 · ρ(geometric score) + 0.3 · ρ(distance to the SAGE-VLM path) &nbsp;→&nbsp; output: one of the 120 intact candidates</p>
+
+    <h3 class="sub"><span class="badge"><i class="fa-solid fa-layer-group"></i></span>Inside the pipeline</h3>
+    <div class="tabs" role="tablist" aria-label="Method figures">
+      <button class="tab" role="tab" aria-selected="true" data-tab="gen"><i class="fa-solid fa-code-branch"></i>Candidate generation</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="sem"><i class="fa-solid fa-road-barrier"></i>From evidence to a checked path</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="sel"><i class="fa-solid fa-arrow-down-wide-short"></i>Candidate selection</button>
+    </div>
+    <div class="tabpanel" data-panel="gen"><figure class="fig"><img src="static/images/fig3_candidate_generation.jpg" width="2000" height="1108" loading="lazy" alt="Candidate generation with RD-YNet on a San Antonio frame: role maps and detections, free-space and TTC-conditioned branches, and the combined pool of 120 candidates."><figcaption class="figcap"><b>Candidate generation with RD-YNet</b> on a San Antonio validation frame. The free-space branch receives the drivable and off-road maps, and the TTC-conditioned branch receives all six role maps. The closest free-space candidate lies 11.08 px from the human demonstration and the closest TTC-conditioned candidate 3.31 px; the 10 candidates within 10 px all come from the TTC-conditioned branch.</figcaption></figure></div>
+    <div class="tabpanel" data-panel="sem" hidden><figure class="fig"><img src="static/images/fig4_semantic_to_path.jpg" width="2000" height="1443" loading="lazy" alt="From scene evidence to a checked pathway in a San Francisco work zone."><figcaption class="figcap"><b>From scene evidence to a checked pathway</b> in one San Francisco work zone. (a) Detections, work-zone proxies, and the observed prefix. (b) Role regions, detections, and the VLM's hazard-side reading linked to the predicates. (c) Checks on the choice of SAGE w/o Z0 and the SAGE output. (d) Z0 replaces the choice of SAGE w/o Z0 with an admissible candidate at a mean displacement of 7.21 px.</figcaption></figure></div>
+    <div class="tabpanel" data-panel="sel" hidden><figure class="fig"><img src="static/images/fig5_candidate_selection.jpg" width="2000" height="1407" loading="lazy" alt="Candidate selection on a San Francisco frame: geometric, opinion, and fused ranks of the candidates."><figcaption class="figcap"><b>Candidate coverage and selection</b> in a San Francisco work zone. (a) The pool of 60 + 60 candidates and the human demonstration. (b) The choice of SAGE w/o VLM and the SAGE output in the same pool. (c) Geometric and opinion ranks for every candidate. (d) Cumulative candidate coverage, with the errors of the choice of SAGE w/o VLM (14.96 px) and the SAGE output (5.50 px) marked.</figcaption></figure></div>
+
+    <h3 class="sub"><span class="badge"><i class="fa-solid fa-scale-balanced"></i></span>The provisions behind the checks</h3>
+    <div class="tablewrap">
+      <table class="prov">
+        <thead><tr><th>MUTCD (11th ed.)</th><th>Requirement (paraphrased)</th><th>Predicate on every candidate</th></tr></thead>
+        <tbody>
+          <tr><td>§6B.06 ¶02</td><td>The work space is the portion of the highway closed to road users.</td><td>RSI &gt; 0: the path enters the restricted-space proxy.</td></tr>
+          <tr><td>§6B.05 ¶02</td><td>Road users whose normal path must be redirected shall be directed to a new path with channelizing devices.</td><td>CBC &gt; 0: the path enters the channelization proxy.</td></tr>
+          <tr><td>§6L.06 ¶17, ¶19</td><td>An arrow board in arrow or chevron mode is used only for lane closures; with the channelizing line it marks the closed side.</td><td>The path ends on the hazard side stated in SAGE-VLM's reading.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote">The predicates are image-space proxies of the provisions; determining regulatory compliance requires a separate engineering assessment.</p>
+  </div>
+</section>
+
+<section class="band" id="videos">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-circle-play"></i></span>Watch SAGE decide</h2>
+    <p class="sec-sub">Four ROADWork validation frames, step by step. Every path, rank, reading, and check in the videos is a stored output of the evaluated system.</p>
+    <div class="tabs" role="tablist" aria-label="Walkthrough videos" id="vtabs"></div>
+    <div class="player">
+      <video id="vplayer" muted loop playsinline controls preload="metadata" poster="static/videos/sage_refine_poster.jpg" src="static/videos/sage_refine.mp4" aria-label="SAGE walkthrough video"></video>
+      <div class="vinfo"><h4 id="vtitle"></h4><p id="vdesc"></p></div>
+    </div>
+  </div>
+</section>
+
+<section id="bev">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-map-location-dot"></i></span>The bird's-eye view</h2>
+    <p class="sec-sub">Each path mapped onto the road with the paper's device-anchored metric frame: MUTCD drums (36 in, 0.91 m) calibrate the camera height and horizon of each recording with enough drums, the others use the median calibration, and a flat-ground pinhole model gives metres ahead and to the side.</p>
+    <div class="cgroups" id="cgroups"></div>
+    <div class="vgrid">
+      <div class="camwrap" id="cam"><button class="zoom" id="zoom" type="button"><i class="fa-solid fa-expand"></i><span>Full frame</span></button></div>
+      <div class="cinfo" id="cinfo"></div>
+    </div>
+    <div class="ctl" id="ctl"></div>
+    <div class="bevwrap" id="bevwrap"></div>
+    <p class="bevcap" id="bevcap"></p>
+    <div class="tablewrap mtable"><table id="mtable"></table></div>
+    <p class="tnote">Measures follow the paper's definitions. <b>Lateral error</b> compares each path with the demonstration at the same image row (the same distance ahead) within rows at least 80 px below the horizon. <b>Lane tolerance</b> holds when the maximum lateral error stays within 1.83 m, half of a 12-ft lane. <b>Clearance</b> is the gap between the 1.07-m half-width footprint of the AASHTO passenger car and a detected object at its ground-contact row; a value below −0.30 m counts as a strike.</p>
+  </div>
+</section>
+
+<section class="band" id="results">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-chart-column"></i></span>Results</h2>
+    <p class="sec-sub">2,306 ROADWork validation episodes from 187 recordings.</p>
+    <div class="stats">
+      <div class="stat"><span class="v tnum">−8.3%</span><span class="d">ADE of SAGE against its geometric ranker, with 12.0% lower FDE, mostly in the far field</span></div>
+      <div class="stat"><span class="v tnum">−37%</span><span class="d">paths with a hard violation (strike, work-space intrusion, or channelization crossing): 2.73% → 1.73%</span></div>
+      <div class="stat"><span class="v tnum">4 / 4</span><span class="d">generator–selector combinations improved by the SAGE-VLM opinion, by 0.73–1.33 px</span></div>
+      <div class="stat"><span class="v tnum">3.45 s</span><span class="d">for SAGE-VLM's reading, decision, goal, and path, against 4.26 s for OneVL's trajectory on the same network</span></div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Method</th><th>ADE<small>px ↓</small></th><th>FDE<small>px ↓</small></th><th>Lat. err.<small>m ↓</small></th><th>Lane miss<small>% ↓</small></th><th>Collision<small>% ↓</small></th><th>Hard viol.<small>% ↓</small></th><th>Score<small>0–100 ↑</small></th><th>Hazard side<small>% ↓</small></th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="9">Path models without language</td></tr>
+          <tr><td>Constant-velocity extrapolation</td><td>21.51</td><td>59.76</td><td>0.174</td><td>6.68</td><td>2.06</td><td>6.57</td><td>93.1</td><td>–</td></tr>
+          <tr><td>Generic planner (one Y-Net branch)</td><td>14.06</td><td>35.08</td><td>0.133</td><td>3.78</td><td>1.01</td><td>2.40</td><td>95.9</td><td>1.16</td></tr>
+          <tr><td>ROADWork released Y-Net</td><td>38.58</td><td>75.99</td><td>0.220</td><td>6.38</td><td>1.49</td><td>3.45</td><td>86.9</td><td>4.17</td></tr>
+                    <tr class="grp"><td colspan="9">VLM / VLA paths executed directly</td></tr>
+          <tr><td>Qwen2.5-VL-7B (zero-shot)</td><td>25.81</td><td>64.90</td><td>0.196</td><td>6.99</td><td>2.01</td><td>6.66</td><td>91.8</td><td><b>0.54</b></td></tr>
+          <tr><td>Senna (ROADWork LoRA)</td><td>18.73</td><td>54.24</td><td>0.145</td><td>5.54</td><td>1.88</td><td>6.36</td><td>93.3</td><td>1.24</td></tr>
+          <tr><td>Impromptu-VLA (ROADWork LoRA)</td><td>17.26</td><td>52.24</td><td>0.126</td><td>4.51</td><td>1.44</td><td>5.18</td><td>94.2</td><td>1.85</td></tr>
+          <tr><td>LightEMMA<sup>†</sup> (ROADWork LoRA)</td><td>14.42</td><td>47.55</td><td><b>0.104</b></td><td>4.21</td><td>1.34</td><td>5.08</td><td>94.5</td><td>2.78</td></tr>
+          <tr><td>OpenEMMA<sup>†</sup> (ROADWork LoRA)</td><td>14.45</td><td>47.50</td><td>0.107</td><td>4.35</td><td>1.15</td><td>5.05</td><td>94.6</td><td>2.24</td></tr>
+          <tr><td>OneVL (authors' ROADWork checkpoint)</td><td>12.74</td><td><b>29.02</b></td><td>0.114</td><td>3.26</td><td><b>0.77</b></td><td>2.83</td><td>96.5</td><td>2.63</td></tr>
+          <tr><td>SAGE-VLM</td><td>12.15</td><td>35.86</td><td>0.110</td><td>3.23</td><td>0.92</td><td>3.33</td><td>95.3</td><td>2.25</td></tr>
+          <tr class="grp"><td colspan="9">SAGE and its ablations</td></tr>
+          <tr class="ours"><td>SAGE w/o VLM</td><td>12.85</td><td>34.63</td><td>0.109</td><td>3.26</td><td>0.86</td><td>2.73</td><td>95.9</td><td>1.47</td></tr>
+          <tr class="ours"><td>SAGE w/o Z0</td><td><b>11.74</b></td><td>30.34</td><td>0.108</td><td><b>3.08</b></td><td><b>0.77</b></td><td>2.11</td><td>96.6</td><td>0.85</td></tr>
+          <tr class="ours"><td><b>SAGE (ours)</b></td><td>11.79</td><td>30.49</td><td>0.108</td><td><b>3.08</b></td><td><b>0.77</b></td><td><b>1.73</b></td><td><b>96.9</b></td><td>0.69</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote">ADE and FDE in source-image pixels (1920 × 1080); lateral error and lane misses in the device-anchored metric frame. Collision, hard violations, and the safety score use the 2,086 human-filtered episodes; hazard side is the share of paths ending on the side named in the human scene description, among the 1,295 episodes whose demonstration ends elsewhere. <sup>†</sup>The prompt contains ROADWork's human scene description. Bold marks the best value in each column.</p>
+    <div class="charts">
+      <div class="chart"><h4>Hard violations</h4><p class="cs">Share of paths that strike an object, intrude into the work space, or enter the channelization (%, human-filtered)</p><div class="bars" id="chart-hard"></div></div>
+      <div class="chart"><h4>The opinion improves every geometric layer</h4><p class="cs">ADE alone (gray) → with the SAGE-VLM opinion (orange), px; every 95% recording-clustered interval excludes zero</p><div class="dumb" id="chart-ladder"></div></div>
+    </div>
+    <div class="chart timeline" style="margin-top: 14px;"><h4>When each piece arrives</h4><p class="cs">Median per frame, batch size 1, one RTX 6000 Ada. The geometric layer returns a complete candidate pool before SAGE-VLM states its reading, and the reading arrives before the trajectory.</p><div class="tscroll" id="chart-time"></div></div>
+  </div>
+</section>
+
+<section id="qualitative">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-images"></i></span>Qualitative results</h2>
+    <div class="tabs" role="tablist" aria-label="Qualitative figures">
+      <button class="tab" role="tab" aria-selected="true" data-tab="q9"><i class="fa-solid fa-table-cells"></i>Nine validation cases</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="qt"><i class="fa-solid fa-list-check"></i>A reasoning trace</button>
+    </div>
+    <div class="tabpanel" data-panel="q9"><figure class="fig"><img src="static/images/fig6_qualitative.jpg" width="2000" height="1711" loading="lazy" alt="Nine validation cases with choices of SAGE w/o VLM, SAGE-VLM paths, choices of SAGE w/o Z0, SAGE outputs, VLM paths executed directly, and human demonstrations."><figcaption class="figcap"><b>Nine validation cases.</b> (a, b) The SAGE-VLM opinion selects a candidate close to the human demonstration that the geometric ranker placed lower. (c–f) Z0 replaces a choice of SAGE w/o Z0 that enters the restricted-space or channelization proxy with a nearby candidate that does not. (g–i) LightEMMA, Impromptu-VLA, and OneVL, executed directly, violate a hard constraint, while SAGE does not.</figcaption></figure></div>
+    <div class="tabpanel" data-panel="qt" hidden><figure class="fig" style="max-width: 760px; margin-inline: auto;"><img src="static/images/fig7_reasoning_trace.jpg" width="1800" height="2014" loading="lazy" alt="Reasoning trace on a Denver frame: SAGE-VLM's reading and decision, rank fusion, and the bounded intervention."><figcaption class="figcap"><b>Observable four-stage trace</b> for one Denver frame. Read and Decide contain recorded SAGE-VLM output; Execute and Check contain computed ranks and predicate values. Rank fusion changes the choice of SAGE w/o VLM C10 to the choice of SAGE w/o Z0 C5, and Z0 replaces C5 with C54. Of 120 candidates, 36 pass the predicates and three satisfy both intervention bounds.</figcaption></figure></div>
+  </div>
+</section>
+
+<section class="band" id="bibtex">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="badge"><i class="fa-solid fa-quote-left"></i></span>BibTeX</h2>
+    <div class="bib">
+      <button class="btn copy" type="button" id="copy"><i class="fa-regular fa-copy"></i><span>Copy</span></button>
+<pre id="bibtext">@misc{liu2026sage,
+  title  = {{SAGE}: A hybrid vision--language and geometry framework for
+            work-zone pathway prediction under temporary traffic control},
+  author = {Liu, Jiaxi and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
+  year   = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Camera frames from the ROADWork dataset (Ghosh et al., ICCV 2025). The teaser, the videos, and the bird's-eye viewer show stored outputs of the evaluated system on validation frames.</p>
+  <p>Page layout follows the <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> project-page template (CC BY-SA 4.0).</p>
+</footer>
+
+<div class="lightbox" id="lightbox" hidden><img alt=""></div>
+<button id="btt" type="button" aria-label="Back to top"><i class="fa-solid fa-chevron-up"></i></button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  /* Links: fill in when public; an empty entry renders a disabled "soon" button. */
+  var LINKS = { paper: "", arxiv: "", code: "" };
+
+  var STY = {
+    human: { c: "#16a34a", d: null, w: 1.05, n: "Human demonstration" },
+    full: { c: "#ea580c", d: null, w: 1.0, n: "SAGE output" },
+    geo: { c: "#2563eb", d: null, w: 1.0, n: "SAGE w/o VLM" },
+    tao: { c: "#eab308", d: [3.0, 1.5], w: 1.05, n: "SAGE w/o Z0 (before the check)" },
+    vlm: { c: "#9333ea", d: [2.2, 1.3], w: 0.85, n: "SAGE-VLM path (opinion)" },
+    onevl: { c: "#db2777", d: [4, 1.4, 1.2, 1.4], w: 0.95, n: "OneVL, executed directly" },
+    lightemma: { c: "#06b6d4", d: [4, 1.4, 1.2, 1.4], w: 0.95, n: "LightEMMA, executed directly" },
+    openemma: { c: "#64748b", d: [4, 1.4, 1.2, 1.4], w: 0.95, n: "OpenEMMA, executed directly" },
+    impromptu: { c: "#a0522d", d: [4, 1.4, 1.2, 1.4], w: 0.95, n: "Impromptu-VLA, executed directly" },
+    senna: { c: "#84cc16", d: [4, 1.4, 1.2, 1.4], w: 0.95, n: "Senna, executed directly" }
+  };
+  var DIRECT = ["onevl", "lightemma", "openemma", "impromptu", "senna"];
+  var ORDER = ["vlm", "onevl", "lightemma", "openemma", "impromptu", "senna", "geo", "tao", "full", "human"];
+  var SHORT = { onevl: "OneVL", lightemma: "LightEMMA", openemma: "OpenEMMA", impromptu: "Impromptu-VLA", senna: "Senna" };
+  var GROUPS = { opinion: { n: "Opinion", c: "#9333ea", i: "fa-route" }, check: { n: "Check", c: "#ea580c", i: "fa-shield-halved" }, direct: { n: "Direct VLM", c: "#db2777", i: "fa-robot" } };
+
+  var CASES = {
+    A2: { g: "opinion", city: "San Francisco", fig: "Fig. 6", t: "The opinion picks the open lane",
+      s: "Cones line the left side and a work vehicle stands on the right. Fusing the geometric and opinion ranks selects a candidate 5.50 px from the human demonstration, against 14.96 px for the choice of SAGE w/o VLM; Z0 keeps it." },
+    A1: { g: "opinion", city: "Philadelphia", fig: "Fig. 7a", t: "Refining within the maneuver",
+      s: "The opinion ranks the pool's closest candidate second, and fusion makes it the choice of SAGE w/o Z0: 3.75 px from the demonstration, against 15.96 px for the choice of SAGE w/o VLM. Z0 keeps it." },
+    C175: { g: "check", city: "San Francisco", fig: "Fig. 4", t: "Z0 keeps the path out of the work space",
+      s: "The choice of SAGE w/o Z0 enters the restricted-space proxy (RSI 13.3%). Z0 replaces it with a passing candidate 7.21 px away, which is also the pool's closest path to the demonstration (3.54 px)." },
+    S7: { g: "check", city: "Denver", fig: "Fig. 9", t: "The opinion points, the check lands",
+      s: "SAGE-VLM reads a closed lane with the hazard on the left. The choice of SAGE w/o Z0 touches the restricted-space proxy; Z0 selects a passing candidate 4.04 px away, second in the opinion rank and 2.21 px from the demonstration." },
+    B6: { g: "check", city: "Minneapolis", fig: "Fig. 7f", t: "The standard steps in",
+      s: "The choice of SAGE w/o Z0 enters the work space and crosses the channelizing line. Z0 outputs the seventh fused candidate, the highest-ranked one that passes: 12.55 px from the demonstration, against 15.50 px." },
+    C109: { g: "check", city: "Boston", fig: "Fig. 7d", t: "Clearing the tubular markers",
+      s: "In a left turn along tubular markers, the choice of SAGE w/o Z0 crosses the channelizing line, and on the ground its footprint overlaps a marker by 0.48 m. The SAGE output keeps 2.35 m of clearance and lies 11.32 px from the demonstration." },
+    C020: { g: "check", city: "San Francisco", fig: "Fig. 7e", t: "Keeping off the barriers",
+      s: "Barriers line the right side. The choice of SAGE w/o Z0 enters the restricted-space proxy (RSI 13.3%); Z0 selects a passing candidate 5.66 px away, 2.63 px from the demonstration." },
+    D15: { g: "direct", city: "Indianapolis", fig: "Fig. 7i", t: "OneVL and SAGE along a drum line",
+      s: "Drums line the right side. OneVL, executed directly, drifts toward them, and its footprint overlaps a drum by 0.36 m. SAGE holds the demonstration's margin, 7.97 px from it against 26.33 px for OneVL." },
+    D8: { g: "direct", city: "San Antonio", fig: "Fig. 7g", t: "LightEMMA and SAGE at a road closure",
+      s: "Drums on the left and barricades on the right. LightEMMA, executed directly, ends 42.91 px from the demonstration with up to 1.23 m of lateral error; SAGE stays within 0.36 m (6.29 px)." },
+    D9: { g: "direct", city: "Philadelphia", fig: "Fig. 7h", t: "Impromptu-VLA and SAGE past cones",
+      s: "Cones next to a work vehicle on the right. Impromptu-VLA, executed directly, passes 0.06 m from a cone; SAGE keeps the demonstration's margin of about 0.4 m (4.78 px against 40.44 px)." }
+  };
+  var TEASER = ["A2", "C175", "D15", "A1", "C109", "D8", "S7", "B6", "D9"];
+  var BEV_HIDE = ["A1", "S7", "B6", "C109"];  // bird's-eye viewer shows only the San Francisco opinion and check cases
+  var VIDEOS = [
+    { k: "refine", t: "Refining within the maneuver", city: "Philadelphia", d: "The opinion ranks geometric #10 second, and fusion selects it. The SAGE output lies 3.75 px from the human demonstration, against 15.96 px for the choice of SAGE w/o VLM." },
+    { k: "check", t: "The standard steps in", city: "San Francisco", d: "A chevron barrier closes the lane ahead. The choice of SAGE w/o Z0 and the next 13 fused candidates enter the work space; Z0 outputs fused #15, the highest-ranked candidate that passes, 7.2 px away: 3.54 px from the demonstration, against 9.54 px before the check." },
+    { k: "check2", t: "Keeping off the barriers", city: "San Francisco", d: "Barriers line the right side. The choice of SAGE w/o Z0 and the next 8 fused candidates enter the work space; Z0 outputs fused #10, 5.7 px away: 2.63 px from the demonstration, against 7.06 px before the check." },
+    { k: "execute", t: "A path used as an opinion", city: "Charlotte", d: "SAGE-VLM reads the hazard on the left and decides to turn right; executed directly, its path would end 31.18 px from the demonstration. As an opinion over intact candidates, it leaves SAGE at 4.15 px." }
+  ];
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- links, tabs, lightbox, copy, back to top ---------- */
+  $$("[data-link]").forEach(function (a) {
+    var u = LINKS[a.getAttribute("data-link")];
+    if (u) { a.href = u; a.target = "_blank"; a.rel = "noopener"; }
+    else { a.classList.add("soon"); a.setAttribute("aria-disabled", "true"); a.title = "Available after publication"; a.insertAdjacentHTML("beforeend", '<span class="tag">soon</span>'); }
+  });
+  $$(".tabs[role=tablist]").forEach(function (list) {
+    var tabs = $$(".tab[data-tab]", list); if (!tabs.length) return;
+    var scope = list.parentElement;
+    tabs.forEach(function (t) {
+      t.addEventListener("click", function () {
+        tabs.forEach(function (x) { x.setAttribute("aria-selected", x === t ? "true" : "false"); });
+        $$(".tabpanel", scope).forEach(function (p) { p.hidden = p.getAttribute("data-panel") !== t.getAttribute("data-tab"); });
+      });
+    });
+  });
+  var lb = $("#lightbox");
+  document.addEventListener("click", function (e) {
+    var img = e.target.closest && e.target.closest(".fig img");
+    if (img) { $("img", lb).src = img.currentSrc || img.src; $("img", lb).alt = img.alt; lb.hidden = false; return; }
+    if (!lb.hidden && e.target.closest("#lightbox")) lb.hidden = true;
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") lb.hidden = true; });
+  $("#copy").addEventListener("click", function () {
+    var txt = $("#bibtext").textContent, b = this, lab = $("span", b);
+    var done = function () { lab.textContent = "Copied"; setTimeout(function () { lab.textContent = "Copy"; }, 1600); };
+    var fallback = function () { var r = document.createRange(); r.selectNodeContents($("#bibtext")); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); lab.textContent = "Selected"; setTimeout(function () { lab.textContent = "Copy"; }, 1600); };
+    try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (err) { fallback(); }
+  });
+  var btt = $("#btt");
+  window.addEventListener("scroll", function () { btt.classList.toggle("show", window.scrollY > 600); }, { passive: true });
+  btt.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }); });
+
+  /* ---------- geometry helpers ---------- */
+  function swatch(k, w) {
+    var s = STY[k], dash = s.d ? s.d.map(function (v) { return v * 2.6; }).join(" ") : "";
+    return '<svg class="sw" width="' + (w || 28) + '" height="10" viewBox="0 0 ' + (w || 28) + ' 10" aria-hidden="true"><line x1="2" y1="5" x2="' + ((w || 28) - 2) + '" y2="5" stroke="#111" stroke-opacity=".55" stroke-width="5" stroke-linecap="round"/><line x1="2" y1="5" x2="' + ((w || 28) - 2) + '" y2="5" stroke="' + s.c + '" stroke-width="3" stroke-linecap="round"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + "/></svg>";
+  }
+  function dOf(P) { var s = ""; for (var i = 0; i < P.length; i++) s += (i ? "L" : "M") + P[i][0].toFixed(1) + " " + P[i][1].toFixed(1); return s; }
+  function partial(P, f) {
+    if (f >= 1) return P; if (f <= 0) return [P[0]];
+    var L = [0]; for (var i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+    var tgt = f * L[L.length - 1], out = [P[0]];
+    for (var j = 1; j < P.length; j++) {
+      if (L[j] <= tgt) { out.push(P[j]); continue; }
+      var r = (tgt - L[j - 1]) / Math.max(L[j] - L[j - 1], 1e-9);
+      out.push([P[j - 1][0] + r * (P[j][0] - P[j - 1][0]), P[j - 1][1] + r * (P[j][1] - P[j - 1][1])]); break;
+    }
+    return out;
+  }
+  function cropWin(pts, minW, pad) {
+    var lo = [1e9, 1e9], hi = [-1e9, -1e9];
+    pts.forEach(function (p) { lo[0] = Math.min(lo[0], p[0]); lo[1] = Math.min(lo[1], p[1]); hi[0] = Math.max(hi[0], p[0]); hi[1] = Math.max(hi[1], p[1]); });
+    lo = [lo[0] - pad, lo[1] - pad]; hi = [hi[0] + pad, hi[1] + pad];
+    var cw = Math.max(minW, hi[0] - lo[0], (hi[1] - lo[1]) * 16 / 9), ch = cw * 9 / 16;
+    cw = Math.min(cw, 1920); ch = Math.min(ch, 1080);
+    var cx = (lo[0] + hi[0]) / 2, cy = (lo[1] + hi[1]) / 2;
+    return [Math.min(Math.max(cx - cw / 2, 0), 1920 - cw), Math.min(Math.max(cy - ch / 2, 0), 1080 - ch), cw, ch];
+  }
+  var cache = {};
+  function getCase(id) {
+    if (!cache[id]) cache[id] = fetch("static/data/cases/" + id + ".json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+    return cache[id];
+  }
+  function defaultVisible(d) {
+    var g = CASES[d.id].g, v = { human: 1, full: 1 };
+    if (g === "opinion") { v.geo = 1; v.vlm = 1; }
+    if (g === "check") { if (d.paths.tao) v.tao = 1; else v.geo = 1; }
+    if (g === "direct" && d.direct) v[d.direct] = 1;
+    return v;
+  }
+
+  /* camera-view path group: black outline, colored stroke, end dot; returns the svg markup */
+  function camPath(k, P, lw, extra) {
+    var s = STY[k], w = lw * s.w, dash = s.d ? ' stroke-dasharray="' + s.d.map(function (v) { return (v * w).toFixed(1); }).join(" ") + '"' : "";
+    var e = P[P.length - 1];
+    return '<g class="p p-' + k + '"' + (extra || "") + ">" +
+      '<path class="o" d="' + dOf(P) + '" fill="none" stroke="#000" stroke-opacity=".85" stroke-width="' + (w * 1.55).toFixed(1) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path class="c" d="' + dOf(P) + '" fill="none" stroke="' + s.c + '" stroke-width="' + w.toFixed(1) + '" stroke-linecap="round" stroke-linejoin="round"' + dash + "/>" +
+      '<circle class="e" cx="' + e[0].toFixed(1) + '" cy="' + e[1].toFixed(1) + '" r="' + (w * 1.05).toFixed(1) + '" fill="' + s.c + '" stroke="#000" stroke-width="' + (w * 0.3).toFixed(1) + '"/></g>';
+  }
+  function camSVG(d, win, lwf, vis, opts) {
+    var lw = win[2] * lwf, h = "";
+    h += '<svg viewBox="' + win.join(" ") + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + esc(d.city) + ' camera view">';
+    h += '<image href="static/images/cases/' + d.id + '/photo.jpg" x="0" y="0" width="1920" height="1080"/>';
+    h += '<image class="proxy" href="static/images/cases/' + d.id + '/proxy.png" x="0" y="0" width="1920" height="1080" preserveAspectRatio="none"' + (opts.proxy ? "" : ' style="display:none"') + "/>";
+    h += '<g class="pool" fill="none" stroke="#f1f5f9" stroke-opacity=".75" stroke-width="' + (lw * 0.24).toFixed(2) + '" stroke-linecap="round"' + (opts.pool ? "" : ' style="display:none"') + ">";
+    d.pool.px.forEach(function (P) { h += '<path d="' + dOf(P) + '"/>'; });
+    h += "</g>";
+    ORDER.forEach(function (k) { if (d.paths[k]) h += camPath(k, d.paths[k].px, lw, vis[k] ? "" : ' style="display:none"'); });
+    if (d.paths.full) {  // thin orange core above the human path, visible where the two coincide
+      h += '<path class="core" d="' + dOf(d.paths.full.px) + '" fill="none" stroke="#ea580c" stroke-width="' + (lw * 0.45).toFixed(1) + '" stroke-linecap="round"' + (vis.full && vis.human ? "" : ' style="display:none"') + "/>";
+    }
+    h += '<g class="prefix">';
+    d.prefix.px.forEach(function (p) { h += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (lw * 1.0).toFixed(1) + '" fill="#fff" stroke="#000" stroke-width="' + (lw * 0.35).toFixed(1) + '"/>'; });
+    return h + "</g></svg>";
+  }
+
+  /* ---------- teaser ---------- */
+  var teaser = $("#teaser"), tiles = [];
+  (function legend() {
+    var keys = ["geo", "vlm", "tao", "full", "human", "onevl"], h = "";
+    keys.forEach(function (k) { h += "<span>" + swatch(k) + (k === "onevl" ? "VLM executed directly" : STY[k].n) + "</span>"; });
+    h += '<span><svg class="sw" width="14" height="10" aria-hidden="true"><circle cx="7" cy="5" r="3.6" fill="#fff" stroke="#111" stroke-width="1.4"/></svg>Observed prefix</span>';
+    $("#teaser-legend").innerHTML = h;
+  })();
+  TEASER.forEach(function (id, i) {
+    var c = CASES[id], g = GROUPS[c.g];
+    var el = document.createElement("div"); el.className = "tile";
+    el.innerHTML = '<img class="poster" src="static/images/cases/' + id + '/photo.jpg" alt="' + esc(c.city) + ' work zone" loading="lazy"><span class="lab"><span class="dot" style="background:' + g.c + '"></span>' + esc(c.g === "direct" ? "vs. " + SHORT[{ D15: "onevl", D8: "lightemma", D9: "impromptu" }[id]] : g.n) + " · " + esc(c.city) + "</span>";
+    teaser.appendChild(el);
+    getCase(id).then(function (d) {
+      var vis = defaultVisible(d), keys = Object.keys(vis);
+      var pts = d.prefix.px.slice(); keys.forEach(function (k) { pts = pts.concat(d.paths[k].px); });
+      var win = cropWin(pts, 640, 90);
+      var steps = c.g === "opinion" ? ["geo", "vlm", "full", "human"] : c.g === "check" ? ["tao", "full", "human"] : [d.direct, "full", "human"];
+      steps = steps.filter(function (k) { return k && d.paths[k] && vis[k]; });
+      el.insertAdjacentHTML("afterbegin", camSVG(d, win, 0.0085, vis, { pool: c.g === "opinion", proxy: c.g !== "opinion" }));
+      var poster = $(".poster", el); if (poster) poster.remove();
+      var svg = $("svg", el);
+      var T = { el: el, svg: svg, off: i * 0.55, steps: steps.map(function (k) { var g = $(".p-" + k, svg); return { k: k, g: g, P: d.paths[k].px, o: $(".o", g), c: $(".c", g), e: $(".e", g) }; }),
+        pool: $(".pool", svg), proxy: $(".proxy", svg), core: $(".core", svg), prefix: $(".prefix", svg), visible: false, last: -1 };
+      tiles.push(T);
+      if (!reduce && "IntersectionObserver" in window) io.observe(el);
+    }).catch(function () { /* the photo stays as the tile */ });
+  });
+  var CYCLE = 9.0, io = "IntersectionObserver" in window ? new IntersectionObserver(function (ents) {
+    ents.forEach(function (en) { tiles.forEach(function (T) { if (T.el === en.target) T.visible = en.isIntersecting; }); });
+  }, { rootMargin: "80px" }) : null;
+  function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
+  function ease(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
+  function tick(now) {
+    var t0 = now / 1000;
+    tiles.forEach(function (T) {
+      if (!T.visible || document.hidden) return;
+      var t = (t0 + T.off) % CYCLE;
+      var fadeOut = 1 - ease((t - 7.7) / 0.7), fadeIn = ease(t / 0.6), a = Math.min(fadeIn, fadeOut);
+      if (T.pool) T.pool.style.opacity = a;
+      if (T.proxy) T.proxy.style.opacity = a;
+      T.prefix.style.opacity = Math.min(1, fadeOut + (t > 8.4 ? 1 : 0));
+      T.steps.forEach(function (S, i) {
+        var f = ease((t - 0.6 - i * 1.0) / 0.85);
+        S.g.style.opacity = fadeOut;
+        if (S.f === f) return; S.f = f;
+        var P = partial(S.P, f), dd = dOf(P), e = P[P.length - 1];
+        S.o.setAttribute("d", dd); S.c.setAttribute("d", dd); S.e.setAttribute("cx", e[0]); S.e.setAttribute("cy", e[1]);
+        S.e.style.opacity = f >= 1 ? 1 : 0;
+      });
+      if (T.core) T.core.style.opacity = T.steps.length && T.steps[T.steps.length - 1].f >= 1 ? fadeOut : 0;
+    });
+    requestAnimationFrame(tick);
+  }
+  if (!reduce) setTimeout(function () { requestAnimationFrame(tick); }, 1200);
+
+  /* ---------- videos ---------- */
+  var vp = $("#vplayer"), vt = $("#vtabs");
+  VIDEOS.forEach(function (v, i) {
+    var b = document.createElement("button"); b.className = "tab"; b.type = "button"; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", i === 0 ? "true" : "false");
+    b.innerHTML = '<span class="tnum" style="opacity:.6">' + (i + 1) + "</span>" + esc(v.t);
+    b.addEventListener("click", function () {
+      $$(".tab", vt).forEach(function (x) { x.setAttribute("aria-selected", x === b ? "true" : "false"); });
+      vp.poster = "static/videos/sage_" + v.k + "_poster.jpg"; vp.src = "static/videos/sage_" + v.k + ".mp4";
+      var p = vp.play(); if (p && p.catch) p.catch(function () {});
+      showV(v);
+    });
+    vt.appendChild(b);
+  });
+  function showV(v) { $("#vtitle").textContent = v.t + " · " + v.city; $("#vdesc").textContent = v.d; }
+  showV(VIDEOS[0]);
+
+  /* ---------- bird's-eye viewer ---------- */
+  var cur = null, curD = null, vis = {}, layers = { pool: true, proxy: true, band: true, corridor: true }, zoomFull = false, focus = null;
+  var cg = $("#cgroups");
+  ["opinion", "check", "direct"].forEach(function (g) {
+    var box = document.createElement("div"); box.className = "cgroup";
+    box.innerHTML = "<span>" + GROUPS[g].n + "</span>";
+    Object.keys(CASES).forEach(function (id) {
+      if (CASES[id].g !== g || BEV_HIDE.indexOf(id) >= 0) return;
+      var b = document.createElement("button"); b.type = "button"; b.className = "cchip"; b.setAttribute("aria-pressed", "false"); b.setAttribute("data-id", id);
+      b.innerHTML = esc(CASES[id].city) + "<small>" + esc(CASES[id].fig) + "</small>";
+      b.addEventListener("click", function () { select(id); });
+      box.appendChild(b);
+    });
+    cg.appendChild(box);
+  });
+  $("#zoom").addEventListener("click", function () { zoomFull = !zoomFull; $("span", this).textContent = zoomFull ? "Zoom to paths" : "Full frame"; drawCam(); });
+
+  function select(id) {
+    cur = id;
+    $$(".cchip", cg).forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-id") === id ? "true" : "false"); });
+    getCase(id).then(function (d) {
+      if (cur !== id) return;
+      curD = d; vis = defaultVisible(d); focus = null;
+      layers.pool = CASES[id].g === "opinion"; layers.proxy = CASES[id].g !== "opinion";
+      drawInfo(); drawCtl(); drawCam(); drawBev(); drawTable();
+    }).catch(function () {
+      $("#cinfo").innerHTML = "<p>The case data could not be loaded. Serve the page over HTTP (for example, <code>python -m http.server</code> in <code>docs/</code>).</p>";
+    });
+  }
+  function drawInfo() {
+    var d = curD, c = CASES[d.id], g = GROUPS[c.g], r = d.reading || {}, z = d.z0 || {};
+    var h = '<span class="meta"><i class="fa-solid ' + g.i + '"></i>' + g.n + " · " + esc(c.city) + " · " + esc(c.fig) + "</span><h4>" + esc(c.t) + "</h4><p>" + esc(c.s) + "</p>";
+    h += '<span class="meta" style="color:var(--faint)">SAGE-VLM reading</span><div class="chips">';
+    if (r.lane) h += '<span class="chip">lane status <b>' + esc(r.lane) + "</b></span>";
+    if (r.hazard) h += '<span class="chip">hazard side <b>' + esc(r.hazard) + "</b></span>";
+    if (r.decision) h += '<span class="chip">decision <b>' + esc(r.decision) + "</b></span>";
+    if (z.changed) h += '<span class="chip">Z0 <b>Δs ' + z.dscore.toFixed(3) + "</b> · <b>D " + z.shift_px.toFixed(2) + " px</b></span>";
+    h += "</div>";
+    $("#cinfo").innerHTML = h;
+  }
+  function drawCtl() {
+    var d = curD, h = "";
+    ["geo", "vlm", "tao", "full", "human"].concat(DIRECT).forEach(function (k) {
+      if (!d.paths[k]) return;
+      var nm = DIRECT.indexOf(k) >= 0 ? SHORT[k] : STY[k].n.replace(" (before the check)", "").replace(" (opinion)", "");
+      h += '<button type="button" class="pchip" data-k="' + k + '" aria-pressed="' + (vis[k] ? "true" : "false") + '">' + swatch(k, 24) + esc(nm) + "</button>";
+    });
+    h += '<button type="button" class="pchip layer" data-l="pool" aria-pressed="' + layers.pool + '"><i class="fa-solid fa-bars-staggered"></i>Candidates</button>';
+    h += '<button type="button" class="pchip layer" data-l="proxy" aria-pressed="' + layers.proxy + '"><i class="fa-solid fa-road-barrier"></i>Proxies</button>';
+    h += '<button type="button" class="pchip layer" data-l="band" aria-pressed="' + layers.band + '"><i class="fa-solid fa-arrows-left-right"></i>Lane tolerance</button>';
+    h += '<button type="button" class="pchip layer" data-l="corridor" aria-pressed="' + layers.corridor + '"><i class="fa-solid fa-car-side"></i>Footprint</button>';
+    var ctl = $("#ctl"); ctl.innerHTML = h;
+    $$(".pchip[data-k]", ctl).forEach(function (b) {
+      var k = b.getAttribute("data-k");
+      b.addEventListener("click", function () { vis[k] = !vis[k]; b.setAttribute("aria-pressed", vis[k] ? "true" : "false"); applyVis(); drawBev(); drawTable(); });
+      b.addEventListener("mouseenter", function () { if (vis[k]) { focus = k; applyFocus(); drawBev(); } });
+      b.addEventListener("mouseleave", function () { focus = null; applyFocus(); drawBev(); });
+    });
+    $$(".pchip[data-l]", ctl).forEach(function (b) {
+      var l = b.getAttribute("data-l");
+      b.addEventListener("click", function () { layers[l] = !layers[l]; b.setAttribute("aria-pressed", layers[l] ? "true" : "false"); applyVis(); drawBev(); });
+    });
+  }
+  function drawCam() {
+    var d = curD; if (!d) return;
+    var pts = d.prefix.px.slice();
+    Object.keys(vis).forEach(function (k) { if (vis[k] && d.paths[k]) pts = pts.concat(d.paths[k].px); });
+    var win = zoomFull ? [0, 0, 1920, 1080] : cropWin(pts, 760, 110);
+    var cam = $("#cam"), old = $("svg", cam); if (old) old.remove();
+    cam.insertAdjacentHTML("afterbegin", camSVG(d, win, 0.0045, vis, { pool: layers.pool, proxy: layers.proxy }));
+    applyFocus();
+  }
+  function applyVis() {
+    var svg = $("#cam svg"); if (!svg) return;
+    ORDER.forEach(function (k) { var g = $(".p-" + k, svg); if (g) g.style.display = vis[k] ? "" : "none"; });
+    var core = $(".core", svg); if (core) core.style.display = vis.full && vis.human ? "" : "none";
+    $(".pool", svg).style.display = layers.pool ? "" : "none";
+    $(".proxy", svg).style.display = layers.proxy ? "" : "none";
+  }
+  function applyFocus() {
+    var svg = $("#cam svg"); if (!svg) return;
+    ORDER.forEach(function (k) { var g = $(".p-" + k, svg); if (g) g.style.opacity = !focus || focus === k ? "" : "0.18"; });
+    var core = $(".core", svg); if (core) core.style.opacity = !focus || focus === "full" ? "" : "0.18";
+  }
+
+  var B = { zmin: -6, zmax: 50, xm: 9, s: 15.2, ml: 46, mr: 14, mt: 12, mb: 38 };
+  function bx(z) { return B.ml + (z - B.zmin) * B.s; }
+  function by(x) { return B.mt + (x + B.xm) * B.s; }
+  function bPath(P) { var s = ""; P.forEach(function (p, i) { s += (i ? "L" : "M") + bx(p[1]).toFixed(1) + " " + by(p[0]).toFixed(1); }); return s; }
+  function band(P, half) {
+    var Q = P.slice().sort(function (a, b) { return a[1] - b[1]; });
+    var up = Q.map(function (p) { return [p[0] - half, p[1]]; }), dn = Q.slice().reverse().map(function (p) { return [p[0] + half, p[1]]; });
+    return bPath(up.concat(dn)) + "Z";
+  }
+  function drawBev() {
+    var d = curD; if (!d) return;
+    var W = B.ml + (B.zmax - B.zmin) * B.s + B.mr, H = B.mt + 2 * B.xm * B.s + B.mb, h = "";
+    h += '<svg viewBox="0 0 ' + W.toFixed(0) + " " + H.toFixed(0) + '" role="img" aria-label="Bird\'s-eye view of the paths in metres">';
+    h += '<defs><clipPath id="bclip"><rect x="' + B.ml + '" y="' + B.mt + '" width="' + ((B.zmax - B.zmin) * B.s).toFixed(1) + '" height="' + (2 * B.xm * B.s).toFixed(1) + '"/></clipPath></defs>';
+    h += '<rect x="' + B.ml + '" y="' + B.mt + '" width="' + ((B.zmax - B.zmin) * B.s).toFixed(1) + '" height="' + (2 * B.xm * B.s).toFixed(1) + '" fill="var(--bev-bg)" stroke="var(--bev-grid)"/>';
+    h += '<g clip-path="url(#bclip)">';
+    // visible ground of the camera: from the image bottom row, within the 50-degree horizontal field of view
+    var zb = d.calib.f * d.calib.h_c / (1080 - d.calib.v_h), tn = 960 / d.calib.f;
+    h += '<path d="M' + bx(zb) + " " + by(-zb * tn) + "L" + bx(B.zmax) + " " + by(-B.zmax * tn) + "L" + bx(B.zmax) + " " + by(B.zmax * tn) + "L" + bx(zb) + " " + by(zb * tn) + 'Z" fill="var(--fov)"/>';
+    for (var z = 0; z <= B.zmax; z += 5) h += '<line x1="' + bx(z) + '" x2="' + bx(z) + '" y1="' + B.mt + '" y2="' + (B.mt + 2 * B.xm * B.s) + '" stroke="var(--bev-grid)" stroke-width="' + (z % 10 ? 0.6 : 1) + '"/>';
+    [-8, -4, 0, 4, 8].forEach(function (x) { h += '<line x1="' + B.ml + '" x2="' + bx(B.zmax) + '" y1="' + by(x) + '" y2="' + by(x) + '" stroke="var(--bev-grid)" stroke-width="' + (x ? 0.6 : 1) + '"/>'; });
+    h += '<line x1="' + bx(0) + '" y1="' + by(0) + '" x2="' + bx(B.zmax) + '" y2="' + by(-B.zmax * tn) + '" stroke="var(--bev-axis)" stroke-dasharray="3 4" stroke-width=".8"/>';
+    h += '<line x1="' + bx(0) + '" y1="' + by(0) + '" x2="' + bx(B.zmax) + '" y2="' + by(B.zmax * tn) + '" stroke="var(--bev-axis)" stroke-dasharray="3 4" stroke-width=".8"/>';
+    var wz = d.calib.window_z;
+    h += '<line x1="' + bx(wz) + '" x2="' + bx(wz) + '" y1="' + B.mt + '" y2="' + (B.mt + 2 * B.xm * B.s) + '" stroke="var(--bev-axis)" stroke-dasharray="5 4" stroke-width="1"/>';
+    var lft = wz > B.zmax - 16;
+    h += '<text x="' + (bx(wz) + (lft ? -5 : 5)) + '" y="' + (B.mt + 14) + '" font-size="11" text-anchor="' + (lft ? "end" : "start") + '" fill="var(--bev-axis)" font-family="var(--display)">metric window: rows ≥ 80 px below the horizon</text>';
+    var H0 = d.paths.human && d.paths.human.m;
+    if (layers.band && H0 && H0.length > 1) h += '<path d="' + band(H0, 1.83) + '" fill="#16a34a" fill-opacity=".09" stroke="#16a34a" stroke-opacity=".35" stroke-width=".8" stroke-dasharray="4 3"/>';
+    var fk = focus || "full";
+    if (layers.corridor && d.paths[fk] && vis[fk] && d.paths[fk].m.length > 1) h += '<path d="' + band(d.paths[fk].m, 1.07) + '" fill="' + STY[fk].c + '" fill-opacity=".16"/>';
+    if (layers.proxy) {
+      [["restricted", "#dc2626"], ["channel", "#f59e0b"]].forEach(function (e) {
+        (d.edges[e[0]] || []).forEach(function (p) { if (p[1] <= B.zmax) h += '<circle cx="' + bx(p[1]).toFixed(1) + '" cy="' + by(p[0]).toFixed(1) + '" r="1.6" fill="' + e[1] + '" fill-opacity=".55"/>'; });
+      });
+    }
+    d.objects.forEach(function (o) {
+      var g = o.ground; if (!g || g.z > B.zmax) return;
+      var col = o.role === "hard" ? "#dc2626" : o.role === "channel" ? "#f59e0b" : "#0ea5e9";
+      var depth = /Vehicle|Equipment/.test(o.cls) ? 4.5 : 0.45, x0 = Math.min(g.x0, g.x1), x1 = Math.max(g.x0, g.x1);
+      if (x1 - x0 < 0.25) { var mid = (x0 + x1) / 2; x0 = mid - 0.125; x1 = mid + 0.125; }
+      h += '<rect x="' + bx(g.z).toFixed(1) + '" y="' + by(x0).toFixed(1) + '" width="' + (depth * B.s).toFixed(1) + '" height="' + ((x1 - x0) * B.s).toFixed(1) + '" rx="1.5" fill="' + col + '" fill-opacity=".8" stroke="#0f172a" stroke-opacity=".6" stroke-width=".6"><title>' + esc(o.cls) + "</title></rect>";
+    });
+    if (layers.pool) { h += '<g fill="none" stroke="var(--bev-pool)" stroke-width=".7">'; d.pool.m.forEach(function (P) { if (P.length > 1) h += '<path d="' + bPath(P) + '"/>'; }); h += "</g>"; }
+    ORDER.forEach(function (k) {
+      if (!vis[k] || !d.paths[k] || d.paths[k].m.length < 2) return;
+      var s = STY[k], w = (k === "full" || k === "human") ? 3 : 2.4, dash = s.d ? ' stroke-dasharray="' + s.d.map(function (v) { return (v * 2.4).toFixed(1); }).join(" ") + '"' : "";
+      var op = !focus || focus === k ? 1 : 0.2;
+      h += '<path d="' + bPath(d.paths[k].m) + '" fill="none" stroke="' + s.c + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round" opacity="' + op + '"' + dash + "/>";
+    });
+    d.prefix.m.forEach(function (p) { h += '<circle cx="' + bx(p[1]).toFixed(1) + '" cy="' + by(p[0]).toFixed(1) + '" r="3.2" fill="#fff" stroke="#111" stroke-width="1.1"/>'; });
+    h += '<rect x="' + bx(-5.0) + '" y="' + by(-1.07) + '" width="' + (5.8 * B.s).toFixed(1) + '" height="' + (2.14 * B.s).toFixed(1) + '" rx="6" fill="var(--ego)"/>';
+    h += '<rect x="' + bx(-1.6) + '" y="' + by(-0.85) + '" width="' + (1.1 * B.s).toFixed(1) + '" height="' + (1.7 * B.s).toFixed(1) + '" rx="3" fill="var(--bev-bg)" fill-opacity=".35"/>';
+    h += '<circle cx="' + bx(0) + '" cy="' + by(0) + '" r="3" fill="#ea580c" stroke="#fff" stroke-width="1"/>';
+    h += "</g>";
+    for (var zt = 0; zt <= B.zmax; zt += 10) h += '<text x="' + bx(zt) + '" y="' + (B.mt + 2 * B.xm * B.s + 15) + '" font-size="11" text-anchor="middle" fill="var(--bev-axis)" font-family="var(--display)">' + zt + "</text>";
+    h += '<text x="' + bx((B.zmax + B.zmin) / 2) + '" y="' + (H - 5) + '" font-size="11.5" text-anchor="middle" fill="var(--muted)" font-family="var(--display)">Distance ahead (m)</text>';
+    [[-8, "8 L"], [-4, "4 L"], [0, "0"], [4, "4 R"], [8, "8 R"]].forEach(function (t) { h += '<text x="' + (B.ml - 7) + '" y="' + (by(t[0]) + 4) + '" font-size="11" text-anchor="end" fill="var(--bev-axis)" font-family="var(--display)">' + t[1] + "</text>"; });
+    h += '<text transform="translate(12 ' + by(0) + ') rotate(-90)" font-size="11.5" text-anchor="middle" fill="var(--muted)" font-family="var(--display)">Lateral (m)</text>';
+    h += "</svg>";
+    $("#bevwrap").innerHTML = h;
+    var cal = d.calib, src = cal.source === "drum" ? "a drum-calibrated recording (camera height " + cal.h_c.toFixed(2) + " m, horizon row " + cal.v_h.toFixed(0) + " px)" : "the median calibration of the 86 drum-calibrated recordings (camera height " + cal.h_c.toFixed(2) + " m, horizon row " + cal.v_h.toFixed(0) + " px)";
+    $("#bevcap").innerHTML = "<b>Ground frame.</b> This frame uses " + src + " and f = 2059 px. The ego car is the AASHTO passenger car (5.8 × 2.13 m) with the camera at the orange dot; dashed rays bound the 50° field of view and the shaded wedge is the ground the camera sees. Detected objects sit at the ground-contact row of their boxes (drawn depth illustrative); dots mark the near edges of the restricted-space (red) and channelization (amber) proxies. The green band is the lane tolerance (±1.83 m) around the demonstration, and the tinted corridor is the 1.07-m half-width footprint of the highlighted path. Hover a path to highlight it.";
+  }
+  function fmt(v, n) { return v === undefined || v === null ? '<span class="na">–</span>' : v.toFixed(n); }
+  function drawTable() {
+    var d = curD, h = '<thead><tr><th>Path</th><th>ADE<small>px</small></th><th>Lateral error<small>mean / max, m</small></th><th>Lane tolerance<small>max ≤ 1.83 m</small></th><th>Min. clearance<small>m</small></th></tr></thead><tbody>';
+    ["human", "full", "tao", "geo", "vlm"].concat(DIRECT).forEach(function (k) {
+      var p = d.paths[k]; if (!p || !vis[k]) return;
+      var nm = DIRECT.indexOf(k) >= 0 ? SHORT[k] + ", executed directly" : STY[k].n;
+      var isH = k === "human";
+      var lat = isH ? '<span class="na">reference</span>' : (p.lat_mean_m === undefined ? '<span class="na">–</span>' : fmt(p.lat_mean_m, 2) + " / " + fmt(p.lat_max_m, 2));
+      var lane = isH ? '<span class="na">–</span>' : (p.lane_miss === undefined ? '<span class="na">–</span>' : p.lane_miss ? '<span class="bad"><i class="fa-solid fa-xmark"></i> miss</span>' : '<span class="ok"><i class="fa-solid fa-check"></i> within</span>');
+      var cl = p.clear_m === undefined ? '<span class="na">no object in range</span>' : (p.strike ? '<span class="bad">' + p.clear_m.toFixed(2) + " · strike</span>" : p.clear_m.toFixed(2));
+      h += '<tr class="' + (k === "full" ? "ours" : "") + '"><td>' + swatch(k, 24) + esc(nm) + "</td><td>" + (isH ? '<span class="na">reference</span>' : p.ade_px.toFixed(2)) + "</td><td>" + lat + "</td><td>" + lane + "</td><td>" + cl + "</td></tr>";
+    });
+    $("#mtable").innerHTML = h + "</tbody>";
+  }
+  select("C175");
+
+  /* ---------- results charts ---------- */
+  (function hard() {
+    var rows = [["SAGE", 1.73, "#ea580c"], ["SAGE w/o Z0", 2.11, "#eab308"], ["Generic planner", 2.40], ["SAGE w/o VLM", 2.73, "#2563eb"], ["OneVL", 2.83], ["SAGE-VLM", 3.33, "#9333ea"], ["ROADWork Y-Net", 3.45], ["OpenEMMA", 5.05], ["LightEMMA", 5.08], ["Impromptu-VLA", 5.18], ["Senna", 6.36], ["Qwen2.5-VL-7B", 6.66]];
+    var h = ""; rows.forEach(function (r) { h += '<div class="bar' + (r[2] ? " ours" : "") + '"><span class="n">' + r[0] + '</span><span class="t"><i style="width:' + (r[1] / 7 * 100).toFixed(1) + "%" + (r[2] ? ";background:" + r[2] : "") + '"></i></span><span class="x">' + r[1].toFixed(2) + "</span></div>"; });
+    $("#chart-hard").innerHTML = h;
+  })();
+  (function ladder() {
+    var rows = [["Generic generator, generator score", 14.06, 0.73], ["Generic generator, learned ranker", 12.79, 0.88], ["Device-aware generator, generator score", 14.58, 1.33], ["Device-aware generator, learned ranker (SAGE w/o VLM)", 12.85, 1.11]];
+    var lo = 11, hi = 15, h = "";
+    rows.forEach(function (r) {
+      var a = r[1], b = r[1] - r[2], X = function (v) { return 4 + (v - lo) / (hi - lo) * 92; };
+      h += '<div class="row"><div class="lab"><span>' + r[0] + "</span><b>−" + r[2].toFixed(2) + ' px</b></div><div class="track"><i class="seg" style="left:' + X(b).toFixed(1) + "%;width:" + (X(a) - X(b)).toFixed(1) + '%"></i><i class="dot a" style="left:' + X(a).toFixed(1) + '%"></i><i class="dot b" style="left:' + X(b).toFixed(1) + '%"></i></div>' +
+        '<div class="lab" style="color:var(--muted)"><span class="tnum">' + a.toFixed(2) + " → " + b.toFixed(2) + " px</span></div></div>";
+    });
+    $("#chart-ladder").innerHTML = h;
+  })();
+  (function timeline() {
+    var W = 900, ml = 196, mr = 70, s = (W - ml - mr) / 4.5, y = 18, h = '<svg viewBox="0 0 ' + W + ' 238" role="img" aria-label="Latency timeline">';
+    var X = function (t) { return ml + t * s; };
+    for (var t = 0; t <= 4.5; t += 0.5) h += '<line x1="' + X(t) + '" x2="' + X(t) + '" y1="8" y2="206" stroke="var(--line)" stroke-width="' + (t % 1 ? 0.6 : 1) + '"/>' + (t % 1 ? "" : '<text x="' + X(t) + '" y="224" font-size="12" text-anchor="middle" fill="var(--faint)" font-family="var(--display)">' + t.toFixed(0) + " s</text>");
+    var rows = [
+      ["Role segmentation", [[0, 0.0057, "#0ea5e9"]], "5.7 ms"],
+      ["RD-YNet branch (60 paths)", [[0, 0.276, "#2563eb"]], "0.28 s"],
+      ["SAGE-VLM reading + decision", [[0, 0.725, "#9333ea"]], "0.73 s"],
+      ["SAGE-VLM goal", [[0, 0.923, "#9333ea"]], "0.92 s"],
+      ["SAGE-VLM complete output", [[0, 3.039, "#9333ea"]], "3.04 s"],
+      ["SAGE-VLM, back to back", [[0, 3.452, "#ea580c"]], "3.45 s"],
+      ["OneVL trajectory, same network", [[0, 4.261, "#94a3b8"]], "4.26 s"]
+    ];
+    rows.forEach(function (r, i) {
+      var yy = y + i * 27;
+      h += '<text x="' + (ml - 10) + '" y="' + (yy + 13) + '" font-size="12.5" text-anchor="end" fill="var(--ink)" font-family="var(--display)">' + r[0] + "</text>";
+      r[1].forEach(function (b) { h += '<rect x="' + X(b[0]) + '" y="' + (yy + 3) + '" width="' + Math.max(2, (b[1] - b[0]) * s).toFixed(1) + '" height="14" rx="4" fill="' + b[2] + '" fill-opacity="' + (i === 2 || i === 3 ? 0.55 : 0.85) + '"/>'; });
+      h += '<text x="' + (X(r[1][0][1]) + 8) + '" y="' + (yy + 14) + '" font-size="12" fill="var(--muted)" font-family="var(--display)">' + r[2] + "</text>";
+    });
+    $("#chart-time").innerHTML = h + "</svg>";
+  })();
+})();
+</script>
+</body>
+</html>
