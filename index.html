@@ -284,7 +284,7 @@ footer p + p { margin-top: 6px; }
       <li><span class="num"><i class="fa-solid fa-magnifying-glass-chart"></i></span><p><b>Selection is the bottleneck.</b> The 120 geometric candidates contain a path within 10 px of the human demonstration in <em>87% of episodes</em>, yet selection regret accounts for 53% of the geometric ranker's error.</p></li>
       <li><span class="num"><i class="fa-solid fa-route"></i></span><p><b>Trajectory as opinion.</b> SAGE-VLM's trajectory ranks the intact candidates by distance, and rank fusion with the geometric score improves <em>all four</em> tested generator–selector combinations.</p></li>
       <li><span class="num"><i class="fa-solid fa-shield-halved"></i></span><p><b>Read the zone, then check the path.</b> MUTCD-structured supervision has SAGE-VLM state the lane status and hazard side before its decision; MUTCD-derived predicates drive a bounded intervention that cuts hard-constraint violations by <em>37%</em>.</p></li>
-      <li><span class="num"><i class="fa-solid fa-bolt"></i></span><p><b>Accurate with a faster VLM.</b> SAGE lowers ADE by 8.3% and FDE by 12.0% relative to the geometric ranker, is comparable to OneVL in accuracy with a VLM that answers in <em>3.45 s against 4.26 s</em>, and outperforms four other adapted driving VLMs in displacement error and safety measures.</p></li>
+      <li><span class="num"><i class="fa-solid fa-bolt"></i></span><p><b>Accurate with a faster VLM.</b> SAGE lowers ADE by 8.3% and FDE by 12.0% relative to the geometric ranker, is comparable to OneVL in accuracy with a VLM that answers in <em>3.06 s against 3.75 s</em>, and outperforms four other adapted driving VLMs in displacement error and safety measures.</p></li>
     </ol>
   </div>
 </section>
@@ -367,7 +367,7 @@ footer p + p { margin-top: 6px; }
       <div class="stat"><span class="v tnum">−8.3%</span><span class="d">ADE of SAGE against its geometric ranker, with 12.0% lower FDE, mostly in the far field</span></div>
       <div class="stat"><span class="v tnum">−37%</span><span class="d">paths with a hard violation (strike, work-space intrusion, or channelization crossing): 2.73% → 1.73%</span></div>
       <div class="stat"><span class="v tnum">4 / 4</span><span class="d">generator–selector combinations improved by the SAGE-VLM opinion, by 0.73–1.33 px</span></div>
-      <div class="stat"><span class="v tnum">3.45 s</span><span class="d">for SAGE-VLM's reading, decision, goal, and path, against 4.26 s for OneVL's trajectory on the same network</span></div>
+      <div class="stat"><span class="v tnum">3.06 s</span><span class="d">for SAGE-VLM's reading, decision, goal, and path, against 3.75 s for OneVL's trajectory on the same network</span></div>
     </div>
     <div class="tablewrap">
       <table>
@@ -853,13 +853,13 @@ footer p + p { margin-top: 6px; }
     var X = function (t) { return ml + t * s; };
     for (var t = 0; t <= 4.5; t += 0.5) h += '<line x1="' + X(t) + '" x2="' + X(t) + '" y1="8" y2="206" stroke="var(--line)" stroke-width="' + (t % 1 ? 0.6 : 1) + '"/>' + (t % 1 ? "" : '<text x="' + X(t) + '" y="224" font-size="12" text-anchor="middle" fill="var(--faint)" font-family="var(--display)">' + t.toFixed(0) + " s</text>");
     var rows = [
-      ["Role segmentation", [[0, 0.0057, "#0ea5e9"]], "5.7 ms"],
-      ["RD-YNet branch (60 paths)", [[0, 0.276, "#2563eb"]], "0.28 s"],
-      ["SAGE-VLM reading + decision", [[0, 0.725, "#9333ea"]], "0.73 s"],
-      ["SAGE-VLM goal", [[0, 0.923, "#9333ea"]], "0.92 s"],
-      ["SAGE-VLM complete output", [[0, 3.039, "#9333ea"]], "3.04 s"],
-      ["SAGE-VLM, back to back", [[0, 3.452, "#ea580c"]], "3.45 s"],
-      ["OneVL trajectory, same network", [[0, 4.261, "#94a3b8"]], "4.26 s"]
+      ["Role segmentation", [[0, 0.0028, "#0ea5e9"]], "2.8 ms"],
+      ["RD-YNet branch (60 paths)", [[0, 0.259, "#2563eb"]], "0.26 s"],
+      ["SAGE-VLM reading + decision", [[0, 0.710, "#9333ea"]], "0.71 s"],
+      ["SAGE-VLM goal", [[0, 0.927, "#9333ea"]], "0.93 s"],
+      ["SAGE-VLM complete output", [[0, 3.083, "#9333ea"]], "3.08 s"],
+      ["SAGE-VLM, back to back", [[0, 3.058, "#ea580c"]], "3.06 s"],
+      ["OneVL trajectory, same network", [[0, 3.752, "#94a3b8"]], "3.75 s"]
     ];
     rows.forEach(function (r, i) {
       var yy = y + i * 27;
