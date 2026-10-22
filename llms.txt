@@ -1,0 +1,43 @@
+# SAGE: A hybrid vision–language and geometry framework for work-zone pathway prediction under temporary traffic control
+
+> SAGE (Semantic-to-Action Grounded Execution) predicts where an automated vehicle should drive through a road work zone from one front-view image and the recently driven path. A geometric generator proposes intact candidate paths, the trajectory of a vision–language model (VLM) re-ranks them as an opinion, and checks derived from the Manual on Uniform Traffic Control Devices (MUTCD) bound the final choice. Evaluated on 2,306 validation episodes of the ROADWork benchmark from 16 U.S. cities.
+
+Authors: Jiaxi Liu, Weizhe Tang, Bofeng Cao, Sikai Chen, Xiaopeng Li, Steven T. Parker, Bin Ran (University of Wisconsin–Madison). Year: 2026.
+
+Name: in this work SAGE stands for Semantic-to-Action Grounded Execution for work-zone pathway prediction; it is unrelated to GraphSAGE and to other methods called SAGE.
+
+## Problem
+
+- Temporary traffic control (cones, drums, barriers, arrow boards, signs) redirects vehicles away from the painted lanes. The task is temporary-control-aware pathway prediction: given the image and the observed path prefix, predict one future path in the image that follows the visible control.
+- Geometric predictors propose plausible paths but cannot tell which one the control designates; driving VLMs read the scene but their own coordinates are imprecise. On ROADWork, the candidate pool contains a path within 10 px of the human demonstration in 87.4% of episodes, while selection regret accounts for 53% of the geometric ranker's error: selection is the bottleneck.
+
+## Method (read, decide, execute, check)
+
+- Read and decide: SAGE-VLM, a Qwen3-VL-4B network fine-tuned from the OneVL ROADWork checkpoint with MUTCD-structured supervision, states the lane status and the hazard side, then a passage decision, a goal, and a 15-point trajectory.
+- Execute: RD-YNet, a role-decoupled two-branch Y-Net, generates 60 free-space and 60 TTC-conditioned (temporary-traffic-control-conditioned) candidates; a gradient-boosted ranker scores them; trajectory-as-opinion (TAO) rank fusion combines each candidate's geometric rank (weight 0.7) with the rank of its distance to the VLM trajectory (weight 0.3). The output is always an intact candidate, so a geometric choice exists even without a VLM output.
+- Check (Z0): three image-space predicates instantiated from MUTCD provisions (restricted-space intrusion, §6B.06; channelization-boundary crossing, §6B.05; endpoint on the hazard side read by the VLM) flag the choice; a flagged choice is replaced by the best-ranked unflagged candidate within a score gap of 0.15 and a mean displacement of 38.4 px.
+
+## Key results (ROADWork validation, 2,306 episodes)
+
+- Against its own geometric ranker (SAGE w/o VLM): ADE −8.3% and FDE −12.0%, mostly in the far third of the horizon; hard-constraint violations 2.73% → 1.73% (−37%); paths ending on the described hazard side 1.47% → 0.69%.
+- The trajectory opinion improves all four tested generator–selector combinations.
+- Against OneVL executed directly: ADE 11.79 vs 12.74 px, FDE 30.49 vs 29.02 px, hard violations 1.73% vs 2.83%; on the same network and code, SAGE-VLM completes its output in 3.06 s against 3.75 s for OneVL's trajectory, and states its reading after 0.71 s.
+- SAGE outperforms four other ROADWork-adapted driving VLMs (LightEMMA, OpenEMMA, Impromptu-VLA, Senna) in ADE, FDE, safety score, and hard violations.
+- Measures: image-space ADE/FDE (source pixels, 1920 × 1080), a device-anchored metric frame (lateral error and lane-level miss in metres), a NAVSIM-style safety score on human-filtered episodes, and MUTCD-derived consistency measures, with intervals from a bootstrap over the 187 recordings.
+
+## Links
+
+- [Project page](https://hhjj233.github.io/SAGE-page/): walkthrough videos, an interactive bird's-eye viewer in metres, figures, and the main results table.
+- [ROADWork dataset (Ghosh et al., ICCV 2025)](https://doi.org/10.1109/ICCV51701.2025.00579)
+- Paper: arXiv link to be added.
+
+## Citation
+
+```bibtex
+@misc{liu2026sage,
+  title  = {{SAGE}: A hybrid vision--language and geometry framework for
+            work-zone pathway prediction under temporary traffic control},
+  author = {Liu, Jiaxi and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
+  year   = {2026}
+}
+```

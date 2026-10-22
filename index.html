@@ -4,7 +4,115 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SAGE Work-Zone Pathways</title>
-<meta name="description" content="SAGE: a hybrid vision-language and geometry framework for work-zone pathway prediction under temporary traffic control.">
+<meta name="description" content="SAGE (Semantic-to-Action Grounded Execution) predicts the path of an automated vehicle through road work zones: a geometric generator proposes intact candidate paths, a vision-language model (VLM) trajectory re-ranks them as an opinion, and MUTCD-derived checks bound the final choice. Evaluated on the ROADWork benchmark.">
+<meta name="keywords" content="work zone, temporary traffic control, MUTCD, automated vehicles, autonomous driving, pathway prediction, trajectory prediction, vision-language model, VLM, ROADWork, candidate selection, trajectory-as-opinion">
+<link rel="canonical" href="https://hhjj233.github.io/SAGE-page/">
+<link rel="alternate" type="text/plain" href="llms.txt" title="Plain-text summary for language models">
+<!-- Google Scholar -->
+<meta name="citation_title" content="SAGE: A hybrid vision–language and geometry framework for work-zone pathway prediction under temporary traffic control">
+<meta name="citation_author" content="Jiaxi Liu">
+<meta name="citation_author" content="Weizhe Tang">
+<meta name="citation_author" content="Bofeng Cao">
+<meta name="citation_author" content="Sikai Chen">
+<meta name="citation_author" content="Xiaopeng Li">
+<meta name="citation_author" content="Steven T. Parker">
+<meta name="citation_author" content="Bin Ran">
+<meta name="citation_author_institution" content="University of Wisconsin–Madison">
+<meta name="citation_publication_date" content="2026">
+<!-- arxiv-meta: filled by tools/set_arxiv_id.py -->
+<!-- Open Graph / social cards -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="SAGE: work-zone pathway prediction with a VLM opinion over geometric candidates">
+<meta property="og:description" content="SAGE (Semantic-to-Action Grounded Execution) predicts the path of an automated vehicle through road work zones: a geometric generator proposes intact candidate paths, a vision-language model (VLM) trajectory re-ranks them as an opinion, and MUTCD-derived checks bound the final choice. Evaluated on the ROADWork benchmark.">
+<meta property="og:url" content="https://hhjj233.github.io/SAGE-page/">
+<meta property="og:image" content="https://hhjj233.github.io/SAGE-page/static/images/teaser_grid.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "ScholarlyArticle",
+ "headline": "SAGE: A hybrid vision–language and geometry framework for work-zone pathway prediction under temporary traffic control",
+ "name": "SAGE: A hybrid vision–language and geometry framework for work-zone pathway prediction under temporary traffic control",
+ "alternateName": "SAGE (Semantic-to-Action Grounded Execution) for work-zone pathway prediction",
+ "author": [
+  {
+   "@type": "Person",
+   "name": "Jiaxi Liu",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  },
+  {
+   "@type": "Person",
+   "name": "Weizhe Tang",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  },
+  {
+   "@type": "Person",
+   "name": "Bofeng Cao",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  },
+  {
+   "@type": "Person",
+   "name": "Sikai Chen",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  },
+  {
+   "@type": "Person",
+   "name": "Xiaopeng Li",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  },
+  {
+   "@type": "Person",
+   "name": "Steven T. Parker",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  },
+  {
+   "@type": "Person",
+   "name": "Bin Ran",
+   "affiliation": {
+    "@type": "Organization",
+    "name": "University of Wisconsin–Madison"
+   }
+  }
+ ],
+ "abstract": "Temporary traffic control redirects vehicles through work zones, requiring automated vehicles to connect an interpretation of the visible devices to a continuous passing path. Geometric predictors can provide several plausible paths, yet selecting the one consistent with the temporary control remains difficult. We propose SAGE (Semantic-to-Action Grounded Execution), a read–decide–execute–check framework that separates path construction, path preference, and control compliance within a shared candidate space. The central idea is to use a vision–language model's (VLM's) trajectory as a preference over intact geometric candidates. A role-decoupled generator constructs the candidates, and rank fusion combines each candidate's geometric score with its agreement with the VLM trajectory. Supervision structured around the Manual on Uniform Traffic Control Devices (MUTCD) trains SAGE-VLM to state the lane status and hazard side before its passage decision and trajectory. The predicted hazard side enters image-space predicates derived from MUTCD provisions, which support a final intervention bounded in score and displacement. On 2,306 real-world ROADWork validation episodes, the candidates include a path within 10 px of the human demonstration in 87% of episodes, yet selection regret accounts for 53% of the geometric ranker's error. SAGE reduces average and final displacement errors by 8.3% and 12.0% relative to the ranker, mostly in the far field, and hard-constraint violations by 37%. The trajectory opinion improves all four tested generator–selector combinations. SAGE is comparable to state-of-the-art VLM modules in accuracy, with a faster-responding VLM, and outperforms four other adapted driving VLMs in displacement error and safety measures. Project page: https://hhjj233.github.io/SAGE-page/.",
+ "keywords": "work zone, temporary traffic control, MUTCD, automated vehicles, autonomous driving, pathway prediction, trajectory prediction, vision-language model, VLM, ROADWork, candidate selection, trajectory-as-opinion",
+ "url": "https://hhjj233.github.io/SAGE-page/",
+ "image": "https://hhjj233.github.io/SAGE-page/static/images/teaser_grid.jpg",
+ "datePublished": "2026",
+ "inLanguage": "en",
+ "isAccessibleForFree": true,
+ "about": [
+  "Road work zones",
+  "Temporary traffic control",
+  "Automated driving",
+  "Vision-language models"
+ ],
+ "isBasedOn": {
+  "@type": "Dataset",
+  "name": "ROADWork",
+  "url": "https://doi.org/10.1109/ICCV51701.2025.00579"
+ },
+ "sameAs": []
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='%230f172a'/%3E%3Cpath d='M10 45 21 9M38 45 27 9' stroke='%23475569' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M24 37C24 29 18.5 24 20.5 11' fill='none' stroke='%23ea580c' stroke-width='3.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='43' r='2' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
