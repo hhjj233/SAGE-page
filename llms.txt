@@ -2,7 +2,7 @@
 
 > SAGE (Semantic-to-Action Grounded Execution) predicts where an automated vehicle should drive through a road work zone from one front-view image and the recently driven path. A geometric generator proposes intact candidate paths, the trajectory of a vision–language model (VLM) re-ranks them as an opinion, and checks derived from the Manual on Uniform Traffic Control Devices (MUTCD) bound the final choice. Evaluated on 2,306 validation episodes of the ROADWork benchmark from 16 U.S. cities.
 
-Authors: Jiaxi Liu, Weizhe Tang, Bofeng Cao, Sikai Chen, Xiaopeng Li, Steven T. Parker, Bin Ran (University of Wisconsin–Madison). Year: 2026.
+Authors: Jiaxi Liu, Keshu Wu, Weizhe Tang, Bofeng Cao, Sikai Chen, Xiaopeng Li, Steven T. Parker, Bin Ran (University of Wisconsin–Madison). Corresponding author: Keshu Wu. Year: 2026.
 
 Name: in this work SAGE stands for Semantic-to-Action Grounded Execution for work-zone pathway prediction; it is unrelated to GraphSAGE and to other methods called SAGE.
 
@@ -37,7 +37,7 @@ Name: in this work SAGE stands for Semantic-to-Action Grounded Execution for wor
 @misc{liu2026sage,
   title  = {{SAGE}: A hybrid vision--language and geometry framework for
             work-zone pathway prediction under temporary traffic control},
-  author = {Liu, Jiaxi and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
+  author = {Liu, Jiaxi and Wu, Keshu and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
   year   = {2026}
 }
 ```

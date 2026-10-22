@@ -2,7 +2,7 @@
 
 Source of the project page of **SAGE: A hybrid vision–language and geometry framework for work-zone pathway prediction under temporary traffic control**.
 
-Jiaxi Liu, Weizhe Tang, Bofeng Cao, Sikai Chen, Xiaopeng Li, Steven T. Parker, Bin Ran — University of Wisconsin–Madison
+Jiaxi Liu, Keshu Wu, Weizhe Tang, Bofeng Cao, Sikai Chen, Xiaopeng Li, Steven T. Parker, Bin Ran — University of Wisconsin–Madison (corresponding author: Keshu Wu)
 
 Live page: https://hhjj233.github.io/SAGE-page/
 
@@ -18,7 +18,7 @@ Citation:
 @misc{liu2026sage,
   title  = {{SAGE}: A hybrid vision--language and geometry framework for
             work-zone pathway prediction under temporary traffic control},
-  author = {Liu, Jiaxi and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
+  author = {Liu, Jiaxi and Wu, Keshu and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
   year   = {2026}
 }
 ```
