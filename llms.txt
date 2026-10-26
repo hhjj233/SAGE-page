@@ -29,15 +29,19 @@ Name: in this work SAGE stands for Semantic-to-Action Grounded Execution for wor
 
 - [Project page](https://hhjj233.github.io/SAGE-page/): walkthrough videos, an interactive bird's-eye viewer in metres, figures, and the main results table.
 - [ROADWork dataset (Ghosh et al., ICCV 2025)](https://doi.org/10.1109/ICCV51701.2025.00579)
-- Paper: arXiv link to be added.
+- [Paper (arXiv:2610.31835)](https://arxiv.org/abs/2610.31835), [PDF](https://arxiv.org/pdf/2610.31835)
 
 ## Citation
 
 ```bibtex
 @misc{liu2026sage,
-  title  = {{SAGE}: A hybrid vision--language and geometry framework for
-            work-zone pathway prediction under temporary traffic control},
-  author = {Liu, Jiaxi and Wu, Keshu and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
-  year   = {2026}
+  title         = {{SAGE}: A hybrid vision--language and geometry framework for
+                   work-zone pathway prediction under temporary traffic control},
+  author        = {Liu, Jiaxi and Wu, Keshu and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
+  year          = {2026},
+  eprint        = {2610.31835},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2610.31835}
 }
 ```

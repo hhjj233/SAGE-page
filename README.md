@@ -10,16 +10,20 @@ SAGE (Semantic-to-Action Grounded Execution) predicts the path of an automated v
 
 A plain-text summary for language models: [`llms.txt`](llms.txt) (served at https://hhjj233.github.io/SAGE-page/llms.txt).
 
-Paper link: to be added.
+Paper: [arXiv:2610.31835](https://arxiv.org/abs/2610.31835)
 
 Citation:
 
 ```bibtex
 @misc{liu2026sage,
-  title  = {{SAGE}: A hybrid vision--language and geometry framework for
-            work-zone pathway prediction under temporary traffic control},
-  author = {Liu, Jiaxi and Wu, Keshu and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
-  year   = {2026}
+  title         = {{SAGE}: A hybrid vision--language and geometry framework for
+                   work-zone pathway prediction under temporary traffic control},
+  author        = {Liu, Jiaxi and Wu, Keshu and Tang, Weizhe and Cao, Bofeng and Chen, Sikai and Li, Xiaopeng and Parker, Steven T. and Ran, Bin},
+  year          = {2026},
+  eprint        = {2610.31835},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2610.31835}
 }
 ```
 
