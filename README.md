@@ -29,4 +29,4 @@ Citation:
 
 The page is a static site (`index.html` and `static/`). To view it locally, run `python -m http.server` in this folder and open `http://localhost:8000`. The code link will be added when it is released.
 
-Camera frames come from the ROADWork dataset (Ghosh et al., ICCV 2025). The videos, the bird's-eye viewer, and the figures show stored outputs of the evaluated system on validation frames. The page layout follows the [Nerfies](https://github.com/nerfies/nerfies.github.io) project-page template (CC BY-SA 4.0).
+Camera frames come from the ROADWork dataset (Ghosh et al., ICCV 2025). The teaser, the videos, and the bird's-eye viewer show stored outputs of the evaluated system on validation frames. The page layout follows the [Nerfies](https://github.com/nerfies/nerfies.github.io) project-page template (CC BY-SA 4.0).
